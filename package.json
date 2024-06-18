@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "install:prod": "npm install --omit=dev"
+    "install:prod": "npm install --omit=dev "
   },
   "dependencies": {
     "@headlessui/react": "^1.7.19",

@@ -311,11 +311,97 @@ export const getuserFollowing = async (id: string) => {
       });
 
       // Extract the user details from the following results
-      const usersFollowing = following.map(follow => follow.user);
+      const usersFollowing = following.map((follow) => follow.user);
       return { usersFollowing };
-    }else{
-      return null
+    } else {
+      return null;
     }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+export const toggleLikeContent = async (userId: string, contentId: string) => {
+  try {
+    // Check if the user already liked the content
+    const existingLike = await db.contentLike.findUnique({
+      where: {
+        userId_contentId: {
+          userId,
+          contentId,
+        },
+      },
+    });
+
+    if (existingLike) {
+      // User already liked the content, so unlike it
+      await db.contentLike.delete({
+        where: {
+          id: existingLike.id,
+        },
+      });
+
+      // Decrement the like count in the content table
+      await db.content.update({
+        where: { id: contentId },
+        data: { likes: { decrement: 1 } },
+      });
+
+      return { liked: false };
+    } else {
+      // User has not liked the content, so like it
+      await db.contentLike.create({
+        data: {
+          userId,
+          contentId,
+        },
+      });
+
+      // Increment the like count in the content table
+      await db.content.update({
+        where: { id: contentId },
+        data: { likes: { increment: 1 } },
+      });
+
+      return { liked: true };
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+export const checkIfLiked = async (userId: string, contentId: string) => {
+  try {
+    const like = await db.contentLike.findUnique({
+      where: {
+        userId_contentId: {
+          userId,
+          contentId,
+        },
+      },
+    });
+
+    return !!like;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to check like status");
+  }
+};
+
+export const getContentLikes = async (contentId: string) => {
+  try {
+    const content = await db.content.findUnique({
+      where: { id: contentId },
+      select: { likes: true },
+    });
+
+    if (!content) {
+      return null;
+    }
+
+    return content.likes;
   } catch (error) {
     console.error(error);
     return null;

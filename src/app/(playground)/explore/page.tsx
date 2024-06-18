@@ -19,7 +19,7 @@ import { contentWithUser } from "@/lib/types";
 import { Interests } from "@prisma/client";
 import { Loader2, PenSquare } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 
 const Page = () => {
   const router = useRouter();
@@ -316,7 +316,7 @@ const Page = () => {
           ) : (
             <div className="flex flex-col my-10 min-h-screen">
               {contents.map((content, index) => (
-                <ContentCard key={index} content={content} isPopular={false} />
+                <ContentCard type="explore" key={index} content={content} isPopular={false} />
               ))}
 
               {contents.length === 0 && (
@@ -331,7 +331,7 @@ const Page = () => {
           <div className="flex font-bold p-4">Popular Stories</div>
           <hr />
           {popularContents.map((content, index) => (
-            <ContentCard key={index} content={content} isPopular={true} />
+            <ContentCard type="explore" key={index} content={content} isPopular={true} />
           ))}
         </div>
       </div>
@@ -339,4 +339,10 @@ const Page = () => {
   );
 };
 
-export default Page;
+const SuspendedPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Page />
+  </Suspense>
+);
+
+export default SuspendedPage;

@@ -28,7 +28,12 @@ const Tiptap = ({ onChange, content, id }: any) => {
       Image.configure({
         inline: false,
       }),
-      HardBreak,
+      HardBreak.configure({
+        HTMLAttributes: {
+          class: 'py-2',
+        },
+      })
+      ,
       Heading.configure({
         levels: [1],
         HTMLAttributes: {

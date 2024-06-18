@@ -1,9 +1,9 @@
 "use client";
 import { content, contentWithUser } from "@/lib/types";
 import { Menubar } from "@radix-ui/react-menubar";
-import { Ellipsis, Menu, Save, ThumbsUp, Users } from "lucide-react";
+import { Ellipsis, Loader2, Menu, Save, ThumbsUp, Users } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -13,7 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { followUser } from "@/lib/supabase/queries";
+import {
+  checkIfLiked,
+  followUser,
+  toggleLikeContent,
+} from "@/lib/supabase/queries";
 import { toast } from "./ui/use-toast";
 import { useSupabaseUser } from "./providers/supabase-user-provider";
 import { Interests } from "@prisma/client";
@@ -23,12 +27,61 @@ import Link from "next/link";
 const ContentCard = ({
   content,
   isPopular,
+  type,
 }: {
   content: contentWithUser;
   isPopular: boolean;
+  type:string
 }) => {
   const { state } = useSupabaseUser();
   const router = useRouter();
+  const [liked, setLiked] = useState<boolean | null>(null);
+  const [likes, setLikes] = useState(content.likes);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLikedStatus = async () => {
+      try {
+        if (state.user) {
+          const isLiked = await checkIfLiked(state.user.id, content.id);
+          setLiked(isLiked);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLikedStatus();
+  }, [state.user, content.id]);
+
+  const handleLikeToggle = async () => {
+    try {
+      if (state.user) {
+        const message = await toggleLikeContent(state.user.id, content.id);
+        console.log(message);
+
+        if (message) {
+          if (liked) {
+            setLikes(likes - 1);
+          } else {
+            setLikes(likes + 1);
+          }
+
+          setLiked(!liked);
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
+
   function formatDate(date: Date): {
     yyyy_mm_dd: string;
     month_day_year: string;
@@ -79,14 +132,14 @@ const ContentCard = ({
 
   return (
     <div
-      className={`flex flex-col hover:shadow-sm hover:shadow-[#D5BF90] rounded-[10px]  ${
+      className={`flex flex-col  rounded-[10px]  ${
         isPopular ? "m-2" : "my-4 mr-4"
       }`}
     >
       <div className="flex items-center  space-x-2 md:p-2 py-2">
         <Link
           href={`/explore/profile?id=${content.authorId}`}
-          className="flex rounded-full cursor-pointer"
+          className={`flex rounded-full cursor-pointer ${type === "explore" && 'pl-4 md:pl-0' } `}
         >
           <Image
             src={
@@ -121,7 +174,7 @@ const ContentCard = ({
           </div>
         )}
       </div>
-      <div className={`flex ${isPopular ? "p-0" : "md:p-4"}`}>
+      <div className={`flex ${isPopular ? "p-0" : type === "explore" && "px-4"}`}>
         <div className="flex  flex-col flex-1">
           <div className="flex md:flex-row flex-col ">
             <div
@@ -173,22 +226,25 @@ const ContentCard = ({
                     ))}
                   </div>
 
-                  <div className="flex space-x-4">
-                    <div
-                      className={`flex  items-center justify-center ${
-                        isPopular && "text-sm"
-                      }`}
-                    >
-                      👏 {content.likes}
+                  {!loading && (
+                    <div className="flex space-x-4">
+                      <div
+                        className={`flex  items-center justify-center cursor-pointer ${
+                          isPopular && "text-sm"
+                        }`}
+                        onClick={handleLikeToggle}
+                      >
+                        {liked ? <>👏</> : <>👍</>} {likes}
+                      </div>
+                      <div
+                        className={`flex  items-center justify-center ${
+                          isPopular && "text-sm"
+                        }`}
+                      >
+                        🗨️ {content.comments}
+                      </div>
                     </div>
-                    <div
-                      className={`flex  items-center justify-center ${
-                        isPopular && "text-sm"
-                      }`}
-                    >
-                      🗨️ {content.comments}
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
 

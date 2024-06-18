@@ -9,22 +9,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import {
+  checkIfLiked,
   followUser,
   getContent,
   getContentByUser,
+  getContentLikes,
+  toggleLikeContent,
 } from "@/lib/supabase/queries";
-import {  contentWithUser } from "@/lib/types";
-import {
-  Ellipsis,
-  Loader2,
-  Mic,
-  MicOff,
-  Save,
-} from "lucide-react";
+import { contentWithUser } from "@/lib/types";
+import { Ellipsis, Loader2, Mic, MicOff, Save } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 
 const Page = () => {
   const { state } = useSupabaseUser();
@@ -34,6 +31,9 @@ const Page = () => {
   const [content, setcontent] = useState<contentWithUser | null>(null);
   const [authorContents, setAuthorContents] = useState<contentWithUser[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [liked, setLiked] = useState<boolean | null>(null);
+  const [likes, setLikes] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const FollowUser = async ({
     followerId,
@@ -62,6 +62,53 @@ const Page = () => {
       });
     }
   };
+
+  useEffect(() => {
+    const fetchLikedStatus = async () => {
+      try {
+        if (state.user && story_id) {
+          const isLiked = await checkIfLiked(state.user.id, story_id);
+          setLiked(isLiked);
+
+          const numlikes = await getContentLikes(story_id);
+          if (numlikes) setLikes(numlikes);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLikedStatus();
+  }, [state.user, story_id]);
+
+  const handleLikeToggle = async () => {
+    try {
+      if (state.user && story_id) {
+        const message = await toggleLikeContent(state.user.id, story_id);
+        console.log(message);
+
+        if (message) {
+          if (liked) {
+            setLikes(likes - 1);
+          } else {
+            setLikes(likes + 1);
+          }
+
+          setLiked(!liked);
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
+
   function formatDate(date: Date): {
     yyyy_mm_dd: string;
     month_day_year: string;
@@ -216,12 +263,19 @@ const Page = () => {
                 </div>
 
                 <div className="flex space-x-4">
-                  <div className={`flex  items-center justify-center `}>
-                    👏 {content.likes}
-                  </div>
-                  <div className={`flex  items-center justify-center `}>
-                    🗨️ {content.comments}
-                  </div>
+                  {!loading && (
+                    <>
+                      <div
+                        className={`flex  items-center justify-center cursor-pointer`}
+                        onClick={handleLikeToggle}
+                      >
+                        {liked ? <>👏</> : <>👍</>} {likes}
+                      </div>
+                      <div className={`flex  items-center justify-center `}>
+                        🗨️ {content.comments}
+                      </div>
+                    </>
+                  )}
                   <div
                     className={`flex  items-center justify-center  cursor-pointer`}
                     onClick={() => speak(content.body)}
@@ -382,7 +436,7 @@ const Page = () => {
           </div>
           <div className="flex  w-full space-x-2 my-2  ">
             <div className={`flex cursor-pointer justify-start text-lg  `}>
-              {content.author.about}
+              {content.author.tagline}
             </div>
           </div>
 
@@ -400,7 +454,7 @@ const Page = () => {
             {authorContents.map((content, index) => (
               <div
                 key={index}
-                className={`flex flex-col my-2  w-full hover:shadow-sm hover:shadow-[#D5BF90] rounded-[10px]  
+                className={`flex flex-col my-2  w-full  rounded-[10px]  
                 `}
               >
                 <div className="flex items-center  space-x-2 p-2">
@@ -476,18 +530,21 @@ const Page = () => {
                             ))}
                           </div>
 
-                          <div className="flex space-x-4">
-                            <div
-                              className={`flex  items-center justify-center`}
-                            >
-                              👏 {content.likes}
+                          {!loading && (
+                            <div className="flex space-x-4">
+                              <div
+                                className={`flex  items-center justify-center cursor-pointer `}
+                                onClick={handleLikeToggle}
+                              >
+                                {liked ? <>👏</> : <>👍</>} {likes}
+                              </div>
+                              <div
+                                className={`flex  items-center justify-center `}
+                              >
+                                🗨️ {content.comments}
+                              </div>
                             </div>
-                            <div
-                              className={`flex  items-center justify-center `}
-                            >
-                              🗨️ {content.comments}
-                            </div>
-                          </div>
+                          )}
                         </div>
                       </div>
 
@@ -543,4 +600,10 @@ const Page = () => {
   );
 };
 
-export default Page;
+const SuspendedPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Page />
+  </Suspense>
+);
+
+export default SuspendedPage;

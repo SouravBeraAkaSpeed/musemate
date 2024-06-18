@@ -11,8 +11,8 @@ import { content, contentWithUser, user } from "@/lib/types";
 import { Edit, Loader2, Upload, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useCallback, useEffect, useState, useRef, Suspense } from "react";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -27,6 +27,8 @@ const Page = () => {
   const [contentsWithUser, setContentsWithUser] = useState<contentWithUser[]>(
     []
   );
+
+  const router = useRouter();
   const [userFollowing, setUserFollowing] = useState<user[]>([]);
 
   const FollowUser = async ({
@@ -66,10 +68,19 @@ const Page = () => {
 
         if (response) {
           setUser(response.user);
-          setContents((prevContents) => [
-            ...prevContents,
-            ...response.contents,
-          ]);
+          setContents((prevContents) => {
+            // Get the ids of the previous contents
+            const prevContentIds = new Set(
+              prevContents.map((content) => content.id)
+            );
+
+            // Filter out contents that already exist
+            const newContents = response.contents.filter(
+              (content) => !prevContentIds.has(content.id)
+            );
+
+            return [...prevContents, ...newContents];
+          });
           setNextCursor(response.nextCursor);
         }
       } catch (error) {
@@ -106,12 +117,14 @@ const Page = () => {
     };
     if (profile_id) {
       getUser();
+      initialFetchDoneRef.current = false;
     }
   }, [profile_id]);
 
   useEffect(() => {
     if (!initialFetchDoneRef.current) {
       initialFetchDoneRef.current = true;
+      setContents([]);
       fetchUserData();
     }
   }, [fetchUserData, profile_id]);
@@ -127,7 +140,7 @@ const Page = () => {
     }
   };
 
-  if (!isMounted)
+  if (!isMounted || user === null)
     return (
       <div className="flex text-white flex-1 justify-center items-center h-[300px]">
         <Loader2 className="h-7 w-7 text-white animate-spin my-4" />
@@ -137,12 +150,12 @@ const Page = () => {
 
   return (
     <div className="flex flex-col w-full  items-center ">
-      <div className="flex flex-col w-[70%] mt-[50px]">
+      <div className="flex flex-col md:w-[70%] w-[90%] mt-[50px]">
         <div className="flex w-full md:flex-row flex-col h-auto">
           <div className="flex flex-col md:w-2/3 md:border-r-2 h-auto">
             <div className="w-full pr-2">
               {user?.banner ? (
-                <div className="w-full flex flex-col items-center justify-center font-bold cursor-pointer pr-10">
+                <div className="w-full flex flex-col items-center justify-center font-bold cursor-pointer py-10 md:pr-10">
                   <Image
                     src={user?.banner}
                     alt="user-banner"
@@ -169,10 +182,10 @@ const Page = () => {
                 </div>
               )}
 
-              <div className="hidden md:flex w-full  text-xl font-bold py-1 pt-10">
-                {user?.full_name}
+              <div className="hidden md:flex w-full  text-xl font-bold py-1 ">
+                {user?.full_name?.toUpperCase()}
               </div>
-              <div className="w-full flex flex-col   py-1 pr-10">
+              <div className="w-full hidden md:flex flex-col   py-2 pb-4 pr-10">
                 {user?.tagline}
               </div>
 
@@ -194,11 +207,31 @@ const Page = () => {
                   </div>
                 )}
 
-                <div className="w-full flex flex-col font-bold   py-1">
-                  {user?.full_name}
+                <div className="w-full flex  font-bold  justify-start items-center py-1">
+                  <div className="flex flex-1">{user?.full_name}</div>
+
+                  {profile_id && (
+                    <div className="  md:hidden flex   py-1 cursor-pointer">
+                      <div
+                        className=" w-auto px-4 py-1 justify-center bg-[#bbaf95] rounded-[10px]"
+                        onClick={() =>
+                          FollowUser({
+                            followerId: state.user?.id,
+                            userId: profile_id,
+                          })
+                        }
+                      >
+                        Follow
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="w-full flex text-sm    py-1">
+                <div className="w-full flex md:hidden flex-col   py-2 pb-4 md:pr-10">
+                  {user?.tagline}
+                </div>
+
+                <div className="w-full hidden md:flex text-sm    py-1">
                   {user?.Interests?.map((interest, index) => (
                     <div key={index} className="flex px-1">
                       #{interest}{" "}
@@ -206,7 +239,7 @@ const Page = () => {
                   ))}
                 </div>
                 {profile_id && (
-                  <div className=" w-full flex   py-1 cursor-pointer">
+                  <div className=" w-full hidden md:flex   py-1 cursor-pointer">
                     <div
                       className=" w-auto px-4 py-1 justify-center bg-[#bbaf95] rounded-[10px]"
                       onClick={() =>
@@ -221,9 +254,10 @@ const Page = () => {
                   </div>
                 )}
               </div>
+              <hr className="py-3" />
               <div className="w-full flex flex-col font-bold  pt-10">About</div>
               <div
-                className="pr-10 whitespace-pre-line flex flex-col  text-justify py-4 rounded-lg"
+                className="md:pr-10 whitespace-pre-line flex flex-col  text-justify py-4 rounded-lg"
                 style={{ whiteSpace: "pre-line" }}
                 dangerouslySetInnerHTML={{
                   __html: user?.about as string | TrustedHTML,
@@ -232,14 +266,25 @@ const Page = () => {
 
               <div className="w-full flex flex-col font-bold  pt-10">Posts</div>
 
-              <div className="flex flex-col my-5 min-h-screen overflow-y-auto" onScroll={handleScroll}>
+              <div
+                className="flex flex-col my-5 min-h-screen "
+                onScroll={handleScroll}
+              >
                 {contentsWithUser.map((content, index) => (
                   <ContentCard
+                    type="profile"
                     key={index}
                     content={content}
                     isPopular={false}
                   />
                 ))}
+
+                {loading && (
+                  <div className="flex text-white flex-1 justify-center items-center h-[300px]">
+                    <Loader2 className="h-7 w-7 text-white animate-spin my-4" />
+                    <p className="text-xs text-white ">Loading ...</p>
+                  </div>
+                )}
 
                 {contents.length === 0 && (
                   <div className="flex text-xl font-bold items-center justify-center">
@@ -302,8 +347,11 @@ const Page = () => {
 
               <div className="hidden w-full md:flex md:flex-col    px-10 py-1">
                 {userFollowing.map((user, index) => (
-                  <Link
-                    href={`/explore/profile?id=${user.id}`}
+                  <div
+                    onClick={() => {
+                      router.push(`/explore/profile?id=${user.id}`);
+                      router.refresh();
+                    }}
                     key={index}
                     className="flex p-2 items-center"
                   >
@@ -321,7 +369,7 @@ const Page = () => {
                       )}{" "}
                     </div>
                     <div className="px-2">{user.full_name}</div>
-                  </Link>
+                  </div>
                 ))}
               </div>
 
@@ -340,4 +388,10 @@ const Page = () => {
   );
 };
 
-export default Page;
+const SuspendedPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Page />
+  </Suspense>
+);
+
+export default SuspendedPage;

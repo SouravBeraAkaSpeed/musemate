@@ -324,7 +324,7 @@ enum Interests {
 model public_users {
   id              String           @id @db.Uuid
   full_name       String?
-  tagline     String?
+  tagline         String?
   about           String?
   onboarded       Boolean          @default(false)
   profile_picture String?
@@ -337,6 +337,7 @@ model public_users {
   followers       UserConnection[] @relation("followers")
   following       UserConnection[] @relation("following")
   contents        Content[]
+  contentLikes    ContentLike[]
   createdAt       DateTime         @default(now())
   modifiedAt      DateTime         @default(now()) @updatedAt
 
@@ -390,6 +391,7 @@ model Content {
   createdAt       DateTime        @default(now())
   modifiedAt      DateTime        @default(now()) @updatedAt
   Poll_options    Poll_options[]
+  contentLikes    ContentLike[]
   total_voters    Int             @default(0)
   isTrending      Boolean         @default(false)
   comments        Int             @default(0)
@@ -406,6 +408,20 @@ model Poll_options {
   contentId  String
   content    Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
+  @@index([contentId])
+  @@schema("public")
+}
+
+model ContentLike {
+  id        String       @id @default(uuid())
+  userId    String
+  contentId String
+  user      public_users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   Content      @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@unique([userId, contentId])
+  @@index([userId])
   @@index([contentId])
   @@schema("public")
 }

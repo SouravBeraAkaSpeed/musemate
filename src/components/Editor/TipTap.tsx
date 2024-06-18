@@ -10,6 +10,7 @@ import Strike from "@tiptap/extension-strike";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import Blockquote from "@tiptap/extension-blockquote";
+import HardBreak from "@tiptap/extension-hard-break";
 
 const Tiptap = ({ onChange, content, id }: any) => {
   const handleChange = (newContent: string) => {
@@ -27,6 +28,7 @@ const Tiptap = ({ onChange, content, id }: any) => {
       Image.configure({
         inline: false,
       }),
+      HardBreak,
       Heading.configure({
         levels: [1],
         HTMLAttributes: {

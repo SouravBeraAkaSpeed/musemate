@@ -282,6 +282,7 @@ export type user = {
   type: User_type;
   createdAt?: Date;
   modifiedAt?: Date;
+  id?: string;
 };
 
 export type content = {

@@ -32,7 +32,9 @@ export const OnboardingFormSchema = z.object({
     .string()
     .describe("About")
     .min(20, "Tell us something about yourself in atleast 20 characters."),
+  tagline: z.string().describe("Tagline"),
   profile_picture: z.string().url().describe("Profile Picture"),
+  banner: z.string().url().describe("Profile Banner"),
   phone_no: z
     .string()
     .min(10, "Number Should have exact 10 digits.")

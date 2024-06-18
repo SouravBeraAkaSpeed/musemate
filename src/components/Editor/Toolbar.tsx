@@ -18,6 +18,7 @@ import {
   Heading,
   Heading6,
   FileImage,
+  ArrowDownNarrowWide,
 } from "lucide-react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { v4 } from "uuid";
@@ -38,7 +39,7 @@ const Toolbar = ({ editor, content, id }: Props) => {
     let input = document.createElement("input");
     input.type = "file";
     input.onchange = (_) => {
-      if (input.files) {
+      if (input.files && id) {
         let files = Array.from(input.files);
         console.log(files);
 
@@ -145,7 +146,7 @@ const Toolbar = ({ editor, content, id }: Props) => {
         <button
           onClick={(e) => {
             e.preventDefault();
-            editor.chain().focus().toggleBulletList().run()
+            editor.chain().focus().toggleBulletList().run();
           }}
           className={
             editor.isActive("bulletList")
@@ -180,6 +181,19 @@ const Toolbar = ({ editor, content, id }: Props) => {
           }
         >
           <Quote className="w-5 h-5" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            editor.chain().focus().setHardBreak().run();
+          }}
+          className={
+            editor.isActive("hardbreak")
+              ? "bg-sky-700 text-white p-2 rounded-lg"
+              : "text-sky-400"
+          }
+        >
+          <ArrowDownNarrowWide className="w-5 h-5" />
         </button>
         <button
           onClick={(e) => {

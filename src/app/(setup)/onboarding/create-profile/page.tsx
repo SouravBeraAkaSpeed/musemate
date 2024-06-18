@@ -1,6 +1,10 @@
 "use client";
 
-import { ProfilePictureUpload } from "@/components/file-upload";
+import StoryEditor from "@/components/Editor/Story_Editor";
+import {
+  ProfileBannerUpload,
+  ProfilePictureUpload,
+} from "@/components/file-upload";
 import MultiSelect from "@/components/multiselect";
 import { useSupabaseUser } from "@/components/providers/supabase-user-provider";
 import { Button } from "@/components/ui/button";
@@ -54,6 +58,7 @@ const Page = () => {
     }[]
   >([]);
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
+  const [uploadingProfileBanner, setUploadingProfileBanner] = useState(false);
   const onBoardingForm = useForm<z.infer<typeof OnboardingFormSchema>>({
     mode: "onChange",
     resolver: zodResolver(OnboardingFormSchema),
@@ -65,6 +70,8 @@ const Page = () => {
       interests: [],
       audience_type: undefined,
       account_type: undefined,
+      tagline: "",
+      banner: "",
     },
   });
 
@@ -84,6 +91,7 @@ const Page = () => {
   > = async (formData) => {
     if (state.user?.email) {
       const user: user = {
+        id: state.user.id,
         about: formData.about,
         audience_type: formData.audience_type as Audience_type,
         type: formData.account_type as User_type,
@@ -97,6 +105,8 @@ const Page = () => {
               return interest as Interests;
             })
           : [],
+        tagline: formData.tagline,
+        banner: formData.banner,
       };
       const res = await onBoardUser(user);
 
@@ -163,9 +173,44 @@ const Page = () => {
                 </div>
               )}
 
+              {uploadingProfileBanner ? (
+                <div className="flex text-white flex-1 justify-center items-center h-[300px]">
+                  <Loader2 className="h-7 w-7 text-white animate-spin my-4" />
+                  <p className="text-xs text-white ">Loading ...</p>
+                </div>
+              ) : (
+                <div className="flex  justify-center ">
+                  <div className="flex flex-col  w-full mx-7">
+                    <Label
+                      htmlFor="profile_picture_url"
+                      className="font-semibold text-white"
+                    >
+                      Profile Banner
+                    </Label>
+                    <FormField
+                      disabled={isOnBoardingLoading}
+                      control={onBoardingForm.control}
+                      name="banner"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <ProfileBannerUpload
+                              value={field.value}
+                              onChange={field.onChange}
+                              setUploadinglogo={setUploadingProfileBanner}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="flex  justify-center ">
                 <div className="flex flex-col  w-full mx-7">
-                  <Label className="font-semibold text-white">Full Name*</Label>
+                  <Label className="font-semibold text-white">Full Name</Label>
                   <FormField
                     disabled={isOnBoardingLoading}
                     control={onBoardingForm.control}
@@ -190,7 +235,33 @@ const Page = () => {
               <div className="flex  justify-center ">
                 <div className="flex flex-col  w-full mx-7">
                   <Label className="font-semibold text-white">
-                    Phone Number*
+                    Profile Tagline
+                  </Label>
+                  <FormField
+                    disabled={isOnBoardingLoading}
+                    control={onBoardingForm.control}
+                    name="tagline"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            className=" text-white  my-2 rounded-[10px]"
+                            placeholder="Ex: I'm a Professional Artist"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="flex  justify-center ">
+                <div className="flex flex-col  w-full mx-7">
+                  <Label className="font-semibold text-white">
+                    Phone Number
                   </Label>
                   <FormField
                     disabled={isOnBoardingLoading}
@@ -215,7 +286,7 @@ const Page = () => {
 
               <div className="flex  justify-center ">
                 <div className="flex flex-col  w-full mx-7">
-                  <Label className="font-semibold text-white">About*</Label>
+                  <Label className="font-semibold text-white">About</Label>
                   <FormField
                     disabled={isOnBoardingLoading}
                     control={onBoardingForm.control}
@@ -223,11 +294,9 @@ const Page = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Textarea
-                            rows={3}
-                            className=" text-white  my-2 rounded-[10px]"
-                            placeholder="Ex: Hello , I'm John , i produce articles, reports, books and other texts."
-                            {...field}
+                          <StoryEditor
+                            onChange={field.onChange}
+                            id={state.user?.id}
                           />
                         </FormControl>
                         <FormMessage />
@@ -239,7 +308,7 @@ const Page = () => {
 
               <div className="flex  justify-center ">
                 <div className="flex flex-col  w-full mx-7">
-                  <Label className="font-semibold text-white">User Type*</Label>
+                  <Label className="font-semibold text-white">User Type</Label>
                   <FormField
                     disabled={isOnBoardingLoading}
                     control={onBoardingForm.control}
@@ -286,7 +355,7 @@ const Page = () => {
               <div className="flex  justify-center ">
                 <div className="flex flex-col  w-full mx-7">
                   <Label className="font-semibold text-white">
-                    Account Type*
+                    Account Type
                   </Label>
                   <FormField
                     disabled={isOnBoardingLoading}

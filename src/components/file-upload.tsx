@@ -7,6 +7,92 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import { Input } from "./ui/input";
 
+
+
+
+interface ProfileBannerUploadProps {
+  onChange: (url?: string) => void;
+  value: string | undefined;
+  setUploadinglogo: React.Dispatch<React.SetStateAction<boolean>>;
+}
+export const ProfileBannerUpload = ({
+  onChange,
+  value,
+  setUploadinglogo,
+}: ProfileBannerUploadProps) => {
+  const { state } = useSupabaseUser();
+  const [profileId, setProfileId] = useState("");
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    if (state.user) setProfileId(state.user.id);
+  }, [state]);
+
+  interface onProfilePictureUploadProps {
+    e: React.ChangeEvent<HTMLInputElement>;
+  }
+  const onProfilePictureUpload = async ({ e }: onProfilePictureUploadProps) => {
+    console.log("called");
+    if (!profileId) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const uuid = v4();
+    setUploadinglogo(true);
+    const { data, error } = await supabase.storage
+      .from("profile-banners")
+      .upload(`profilebanners.${profileId}.${uuid}`, file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
+
+    if (!error) {
+      console.log(data);
+      const path = supabase.storage
+        .from("profile-banners")
+        .getPublicUrl(`profilebanners.${profileId}.${uuid}`)?.data.publicUrl;
+      onChange(path);
+      setUploadinglogo(false);
+    }
+  };
+
+  if (value) {
+    return (
+      <div className="relative flex justify-center items-center p-4  rounded-[10px] bg-background/10 border-2 mt-3 ">
+        <Image
+          width={500}
+          height={200}
+          src={value}
+          alt="Profile Banner"
+          className=" w-[500px] h-[200px]"
+        />
+
+        <button
+          onClick={() => onChange("")}
+          className="bg-rose-500 text-white p-1 rounded-full absolute top-1 right-1 shadow-sm"
+          type="button"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <Input
+      type="file"
+      accept="image/*"
+      className="text-white  my-2   rounded-[10px]"
+      onChange={(e) => {
+        onProfilePictureUpload({ e });
+      }}
+      value={value}
+    />
+  );
+};
+
+
+
+
 interface ProfilePictureUploadProps {
   onChange: (url?: string) => void;
   value: string | undefined;

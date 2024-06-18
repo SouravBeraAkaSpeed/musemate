@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 interface StoryEditorProps {
   onChange: (...event: any[]) => void;
-  id:string;
+  id:string | undefined;
 }
 
 const StoryEditor = ({ onChange,id }: StoryEditorProps) => {

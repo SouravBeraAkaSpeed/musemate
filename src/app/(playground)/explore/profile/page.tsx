@@ -8,7 +8,7 @@ import {
   getuserFollowing,
 } from "@/lib/supabase/queries";
 import { content, contentWithUser, user } from "@/lib/types";
-import { Loader2, Upload, User } from "lucide-react";
+import { Edit, Loader2, Upload, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -89,7 +89,7 @@ const Page = () => {
       }));
       setContentsWithUser(updatedContentsWithUser);
     }
-  }, [user, contents]);
+  }, [user, contents, profile_id]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -114,7 +114,7 @@ const Page = () => {
       initialFetchDoneRef.current = true;
       fetchUserData();
     }
-  }, [fetchUserData]);
+  }, [fetchUserData, profile_id]);
 
   const handleScroll = (e: React.UIEvent<HTMLElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
@@ -140,19 +140,28 @@ const Page = () => {
       <div className="flex flex-col w-[70%] mt-[50px]">
         <div className="flex w-full md:flex-row flex-col h-auto">
           <div className="flex flex-col md:w-2/3 md:border-r-2 h-auto">
-            <div className="w-full ">
+            <div className="w-full pr-2">
               {user?.banner ? (
-                <div className="w-full flex flex-col items-center justify-center font-bold cursor-pointer ">
+                <div className="w-full flex flex-col items-center justify-center font-bold cursor-pointer pr-10">
                   <Image
                     src={user?.banner}
                     alt="user-banner"
                     width={500}
-                    height={300}
+                    height={200}
+                    className="w-full h-[200px]"
                   />
+                  {state.user?.id === profile_id && (
+                    <div className="w-full flex justify-end my-2">
+                      <div className="flex ">
+                        {" "}
+                        Change Banner <Edit className="ml-2" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="w-full flex flex-col items-center justify-center font-bold cursor-pointer ">
-                  {state?.user &&  state.user?.id === profile_id && (
+                <div className="w-full flex flex-col items-center justify-center font-bold cursor-pointer  pr-10">
+                  {state?.user && state.user?.id === profile_id && (
                     <>
                       <Upload className="md:w-[60%] h-[100px]" /> Upload Banner
                     </>
@@ -163,7 +172,9 @@ const Page = () => {
               <div className="hidden md:flex w-full  text-xl font-bold py-1 pt-10">
                 {user?.full_name}
               </div>
-              <div className="w-full flex flex-col   py-1">{user?.tagline}</div>
+              <div className="w-full flex flex-col   py-1 pr-10">
+                {user?.tagline}
+              </div>
 
               <div className="md:hidden flex flex-col  cursor-pointer mt-4 ">
                 {user?.profile_picture ? (
@@ -212,7 +223,7 @@ const Page = () => {
               </div>
               <div className="w-full flex flex-col font-bold  pt-10">About</div>
               <div
-                className="ProseMirror whitespace-pre-line flex flex-col  text-justify py-4 rounded-lg"
+                className="pr-10 whitespace-pre-line flex flex-col  text-justify py-4 rounded-lg"
                 style={{ whiteSpace: "pre-line" }}
                 dangerouslySetInnerHTML={{
                   __html: user?.about as string | TrustedHTML,
@@ -221,7 +232,7 @@ const Page = () => {
 
               <div className="w-full flex flex-col font-bold  pt-10">Posts</div>
 
-              <div className="flex flex-col my-5 min-h-screen">
+              <div className="flex flex-col my-5 min-h-screen overflow-y-auto" onScroll={handleScroll}>
                 {contentsWithUser.map((content, index) => (
                   <ContentCard
                     key={index}
@@ -291,7 +302,11 @@ const Page = () => {
 
               <div className="hidden w-full md:flex md:flex-col    px-10 py-1">
                 {userFollowing.map((user, index) => (
-                  <div key={index} className="flex p-2 items-center">
+                  <Link
+                    href={`/explore/profile?id=${user.id}`}
+                    key={index}
+                    className="flex p-2 items-center"
+                  >
                     <div>
                       {user.profile_picture ? (
                         <Image
@@ -306,7 +321,7 @@ const Page = () => {
                       )}{" "}
                     </div>
                     <div className="px-2">{user.full_name}</div>
-                  </div>
+                  </Link>
                 ))}
               </div>
 

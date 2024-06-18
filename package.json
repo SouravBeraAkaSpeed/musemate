@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && prisma generate && prisma migrate deploy",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "install:prod": "npm install --omit=dev"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.19",

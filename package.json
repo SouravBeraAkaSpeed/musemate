@@ -2,16 +2,12 @@
   "name": "web-app",
   "version": "0.1.0",
   "private": true,
- "scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "lint": "next lint",
-  "postinstall": "npm ci --ignore-scripts && npm run prisma:generate"
-},
-"prisma": {
-  "generate": "prisma generate"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "npx prisma generate && next build ",
+    "start": "next start",
+    "lint": "next lint"
+  },
   "dependencies": {
     "@headlessui/react": "^1.7.19",
     "@hookform/resolvers": "^3.3.4",

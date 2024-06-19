@@ -178,11 +178,17 @@ const Page = () => {
         } catch (error) {
           console.log(error)
         }
+
+        toast({
+          title: "Audio 1..",
+        });
         setIsSpeaking(false);
       } else {
         // Create a new speech synthesis utterance instance
         const utterance = new SpeechSynthesisUtterance(text);
-
+        toast({
+          title: "Audio 2..",
+        });
         // Optionally, you can set properties on the utterance
         // utterance.lang = 'en-US'; // Set the language
         // utterance.pitch = 1; // Set the pitch

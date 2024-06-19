@@ -149,11 +149,12 @@ const Page = () => {
     };
 
     const text = stripHtmlTags(htmlString);
-    toast({
-      title:text,
-    });
+    
 
     if ("speechSynthesis" in window && text) {
+      toast({
+        title: "speechSynthesis",
+      });
      
       // Wait for voices to be loaded
       const voices = window.speechSynthesis.getVoices();

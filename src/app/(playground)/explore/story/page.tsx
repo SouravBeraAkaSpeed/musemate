@@ -135,21 +135,7 @@ const Page = () => {
     return { yyyy_mm_dd, month_day_year };
   }
 
-  const speak = async (htmlString: string | null) => {
-    if (!htmlString) {
-      console.error("No text provided.");
-      return;
-    }
-
-    // Strip HTML tags and get plain text
-    const stripHtmlTags = (html: string): string => {
-      const div = document.createElement("div");
-      div.innerHTML = html;
-      return div.textContent || div.innerText || "";
-    };
-
-    const text = stripHtmlTags(htmlString);
-
+  const speaks = async (text: string | null) => {
     if ("speechSynthesis" in window && text) {
       // Wait for voices to be loaded
       const loadVoices = new Promise((resolve) => {
@@ -199,6 +185,26 @@ const Page = () => {
       }
     } else {
       console.error("Sorry, your browser doesn't support text to speech.");
+    }
+  };
+
+  const speak = async (htmlString: string | null) => {
+    if (!htmlString) {
+      console.error("No text provided.");
+      return;
+    }
+
+    // Strip HTML tags and get plain text
+    const stripHtmlTags = (html: string): string => {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      return div.textContent || div.innerText || "";
+    };
+
+    const text = stripHtmlTags(htmlString);
+
+    if (text) {
+      await speaks(text);
     }
   };
 

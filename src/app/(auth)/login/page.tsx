@@ -109,7 +109,7 @@ const LoginPage = () => {
     }
   };
   return (
-    <div className="z-10 flex flex-col items-center justify-center h-[550px]     w-[450px] min-h-20 rounded-[20px] border border-white/10 backdrop-blur-md relative">
+    <div className="z-10 flex flex-col items-center justify-center h-[550px]  w-[90%]   md:w-[450px] min-h-20 rounded-[20px] border border-white/10 backdrop-blur-md relative">
       <div className="absolute left-0 right-0 flex items-center justify-center -top-20">
         <div className="flex flex-col items-center top-[40px] relative justify-center h-32 w-32 rounded-full ">
           <Link
@@ -121,7 +121,7 @@ const LoginPage = () => {
         </div>
       </div>
       <div className="mt-[140px]">
-        <Tabs defaultValue="login" className="w-[400px]">
+        <Tabs defaultValue="login" className="w-[90%]   md:w-[400px]">
           <TabsList className="grid w-full grid-cols-2 rounded-xl ">
             <TabsTrigger className=" text-white rounded-xl " value="login">
               Login

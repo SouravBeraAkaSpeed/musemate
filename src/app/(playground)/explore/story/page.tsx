@@ -135,31 +135,53 @@ const Page = () => {
   }
 
   function speak(text: string | null): void {
-    // Check if the browser supports speech synthesis
     if ("speechSynthesis" in window && text) {
+      // Wait for voices to be loaded
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          speak(text); // Retry speaking after voices are loaded
+        };
+        return;
+      }
+  
       // Cancel any ongoing speech
       if (window.speechSynthesis.speaking) {
-        console.log("testing..");
+        console.log("Cancelling ongoing speech...");
         window.speechSynthesis.cancel();
         setIsSpeaking(false);
       } else {
         // Create a new speech synthesis utterance instance
         const utterance = new SpeechSynthesisUtterance(text);
-
+  
         // Optionally, you can set properties on the utterance
         // utterance.lang = 'en-US'; // Set the language
         // utterance.pitch = 1; // Set the pitch
         // utterance.rate = 1; // Set the rate (speed)
         // utterance.volume = 1; // Set the volume
-
+  
+        // Set callbacks for debugging and state management
+        utterance.onstart = () => {
+          console.log("Speech started");
+          setIsSpeaking(true);
+        };
+        utterance.onend = () => {
+          console.log("Speech ended");
+          setIsSpeaking(false);
+        };
+        utterance.onerror = (event) => {
+          console.error("Speech synthesis error", event);
+          setIsSpeaking(false);
+        };
+  
         // Speak the utterance
         window.speechSynthesis.speak(utterance);
-        setIsSpeaking(true);
       }
     } else {
       console.error("Sorry, your browser doesn't support text to speech.");
     }
   }
+  
 
   useEffect(() => {
     if (story_id) {

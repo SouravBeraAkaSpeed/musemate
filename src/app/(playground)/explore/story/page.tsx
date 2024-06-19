@@ -140,6 +140,10 @@ const Page = () => {
       return;
     }
 
+    toast({
+      title:"entered",
+    });
+
     const stripHtmlTags = (html: string): string => {
       const div = document.createElement("div");
       div.innerHTML = html;
@@ -147,8 +151,14 @@ const Page = () => {
     };
 
     const text = stripHtmlTags(htmlString);
+    toast({
+      title:text,
+    });
 
     if ("speechSynthesis" in window && text) {
+      toast({
+        title:"entered",
+      });
       // Wait for voices to be loaded
       const voices = window.speechSynthesis.getVoices();
       if (voices.length === 0) {
@@ -160,8 +170,13 @@ const Page = () => {
 
       // Cancel any ongoing speech
       if (window.speechSynthesis.speaking) {
-        console.log("Cancelling ongoing speech...");
-        window.speechSynthesis.cancel();
+        try {
+          
+          console.log("Cancelling ongoing speech...");
+          window.speechSynthesis.cancel();
+        } catch (error) {
+          console.log(error)
+        }
         setIsSpeaking(false);
       } else {
         // Create a new speech synthesis utterance instance

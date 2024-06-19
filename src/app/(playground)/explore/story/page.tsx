@@ -69,7 +69,8 @@ const Page = () => {
         if (state.user && story_id) {
           const isLiked = await checkIfLiked(state.user.id, story_id);
           setLiked(isLiked);
-
+        }
+        if (story_id) {
           const numlikes = await getContentLikes(story_id);
           if (numlikes) setLikes(numlikes);
         }
@@ -139,16 +140,16 @@ const Page = () => {
       console.error("No text provided.");
       return;
     }
-  
+
     // Strip HTML tags and get plain text
     const stripHtmlTags = (html: string): string => {
       const div = document.createElement("div");
       div.innerHTML = html;
       return div.textContent || div.innerText || "";
     };
-  
+
     const text = stripHtmlTags(htmlString);
-  
+
     if ("speechSynthesis" in window && text) {
       // Wait for voices to be loaded
       const loadVoices = new Promise((resolve) => {
@@ -161,9 +162,9 @@ const Page = () => {
           };
         }
       });
-  
+
       await loadVoices;
-  
+
       // Cancel any ongoing speech
       if (window.speechSynthesis.speaking) {
         console.log("Cancelling ongoing speech...");
@@ -172,13 +173,13 @@ const Page = () => {
       } else {
         // Create a new speech synthesis utterance instance
         const utterance = new SpeechSynthesisUtterance(text);
-  
+
         // Set optional properties on the utterance
         // utterance.lang = 'en-US'; // Set the language
         // utterance.pitch = 1; // Set the pitch
         // utterance.rate = 1; // Set the rate (speed)
         // utterance.volume = 1; // Set the volume
-  
+
         // Set callbacks for debugging and state management
         utterance.onstart = () => {
           console.log("Speech started");
@@ -192,7 +193,7 @@ const Page = () => {
           console.error("Speech synthesis error", event);
           setIsSpeaking(false);
         };
-  
+
         // Speak the utterance
         window.speechSynthesis.speak(utterance);
       }
@@ -200,7 +201,6 @@ const Page = () => {
       console.error("Sorry, your browser doesn't support text to speech.");
     }
   };
-  
 
   useEffect(() => {
     if (story_id) {

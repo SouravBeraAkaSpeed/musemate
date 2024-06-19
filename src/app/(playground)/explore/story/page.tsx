@@ -134,72 +134,54 @@ const Page = () => {
     return { yyyy_mm_dd, month_day_year };
   }
 
-  const  speak = async (htmlString: string | null) => {
+  const speak = async (htmlString: string | null) => {
     if (!htmlString) {
       console.error("No text provided.");
       return;
     }
-
-   
-
+  
+    // Strip HTML tags and get plain text
     const stripHtmlTags = (html: string): string => {
       const div = document.createElement("div");
       div.innerHTML = html;
       return div.textContent || div.innerText || "";
     };
-
+  
     const text = stripHtmlTags(htmlString);
-    
-
+  
     if ("speechSynthesis" in window && text) {
-      
-     
       // Wait for voices to be loaded
-      // const voices = window.speechSynthesis.getVoices();
-      // if (voices.length === 0) {
-      //   toast({
-      //     title: "Audio Playing..",
-      //   });
-      //   window.speechSynthesis.onvoiceschanged = () => {
-      //     speak(text); // Retry speaking after voices are loaded
-      //     toast({
-      //       title: "Audio changed..",
-      //     });
-      //   };
-        
-      // }
-
+      const loadVoices = new Promise((resolve) => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length !== 0) {
+          resolve(voices);
+        } else {
+          window.speechSynthesis.onvoiceschanged = () => {
+            resolve(window.speechSynthesis.getVoices());
+          };
+        }
+      });
+  
+      await loadVoices;
+  
       // Cancel any ongoing speech
       if (window.speechSynthesis.speaking) {
-        try {
-          
-          console.log("Cancelling ongoing speech...");
-          window.speechSynthesis.cancel();
-        } catch (error) {
-          console.log(error)
-        }
-
-        toast({
-          title: "Audio 1..",
-        });
+        console.log("Cancelling ongoing speech...");
+        window.speechSynthesis.cancel();
         setIsSpeaking(false);
       } else {
         // Create a new speech synthesis utterance instance
         const utterance = new SpeechSynthesisUtterance(text);
-        toast({
-          title: "Audio 2..",
-        });
-        // Optionally, you can set properties on the utterance
+  
+        // Set optional properties on the utterance
         // utterance.lang = 'en-US'; // Set the language
         // utterance.pitch = 1; // Set the pitch
         // utterance.rate = 1; // Set the rate (speed)
         // utterance.volume = 1; // Set the volume
-
+  
         // Set callbacks for debugging and state management
         utterance.onstart = () => {
-          toast({
-            title: "Audio Playing..",
-          });
+          console.log("Speech started");
           setIsSpeaking(true);
         };
         utterance.onend = () => {
@@ -210,16 +192,15 @@ const Page = () => {
           console.error("Speech synthesis error", event);
           setIsSpeaking(false);
         };
-
+  
         // Speak the utterance
         window.speechSynthesis.speak(utterance);
       }
     } else {
-      toast({
-        title: "Sorry, your browser doesn't support text to speech.",
-      });
+      console.error("Sorry, your browser doesn't support text to speech.");
     }
-  }
+  };
+  
 
   useEffect(() => {
     if (story_id) {
@@ -342,7 +323,7 @@ const Page = () => {
                       </div>
                     </>
                   )}
-                  <div
+                  <button
                     className={`flex  items-center justify-center  cursor-pointer`}
                     onClick={() => speak(content.body)}
                   >
@@ -355,7 +336,7 @@ const Page = () => {
                         <Mic className="mx-1" /> Listen
                       </>
                     )}
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>

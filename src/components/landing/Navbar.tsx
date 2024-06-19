@@ -27,7 +27,7 @@ export function Navbar({ className }: { className?: string }) {
       <Menu setActive={setActive}>
         <Link
           href={"/"}
-          className="flex flex-col  flex-1 space-y-4 text-sm font-bold items-start  w-[100px]  justify-center text-[#E3BF90]"
+          className="flex flex-col  flex-1 space-y-4 text-sm font-bold items-start  w-[100px]  justify-center text-white"
         >
           MYMUSEMATE
         </Link>
@@ -85,7 +85,7 @@ export function Navbar({ className }: { className?: string }) {
               Profile
             </Link>
             <Button
-              className="flex flex-col font-semibold rounded-[10px]  text-sm bg-[#E3BF90] p-2   hover:text-black"
+              className="flex flex-col font-semibold rounded-[10px]  text-sm bg-white p-2  text-black  hover:text-black"
               onClick={() => handleSignout()}
             >
               LogOut
@@ -93,7 +93,7 @@ export function Navbar({ className }: { className?: string }) {
           </>
         ) : (
           <Link
-            className="flex flex-col font-semibold rounded-[10px]  text-sm bg-[#E3BF90] p-2   hover:text-black"
+            className="flex flex-col font-semibold rounded-[10px]  text-sm bg-white p-2  text-black hover:text-black"
             href={"/login"}
           >
             SignIn

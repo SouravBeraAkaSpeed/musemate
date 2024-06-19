@@ -433,7 +433,7 @@ const Page = () => {
               <Button
                 type="submit"
                 variant="ghost"
-                className="border-2 mx-7 text-white rounded-[10px] my-4  hover:bg-[#D5BF90] hover:text-black font-semibold"
+                className="border-2 mx-7 text-white rounded-[10px] my-4  hover:bg-gray-500 hover:text-black font-semibold"
               >
                 {isOnBoardingLoading ? (
                   <div className="flex text-white flex-1 justify-center items-center h-[300px]">

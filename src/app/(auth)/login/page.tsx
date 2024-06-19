@@ -114,7 +114,7 @@ const LoginPage = () => {
         <div className="flex flex-col items-center top-[40px] relative justify-center h-32 w-full rounded-full ">
           <Link
             href={"/"}
-            className="flex flex-col space-y-4 mt-[120px] font-bold text-2xl text-[#E3BF90]"
+            className="flex flex-col space-y-4 mt-[120px] font-bold text-2xl text-white"
           >
             MYMUSEMATE
           </Link>
@@ -185,7 +185,7 @@ const LoginPage = () => {
                 {submitError && <FormMessage>{submitError}</FormMessage>}
                 <Button
                   type="submit"
-                  className="w-full p-6 rounded-[15px] dark:bg-[#E3BF90] hover:bg-[#d0b38d]  border-4 border-[#2c2c31]  text-black hover:text-[#424244] "
+                  className="w-full p-6 rounded-[15px] dark:bg-white hover:bg-[#d0b38d]  border-4 border-[#2c2c31]  text-black hover:text-[#424244] "
                   size="lg"
                   disabled={isLoading}
                 >
@@ -264,7 +264,7 @@ const LoginPage = () => {
                 {submitError && <FormMessage>{submitError}</FormMessage>}
                 <Button
                   type="submit"
-                  className="w-full p-6 rounded-[15px] dark:bg-[#E3BF90] hover:bg-[#d0b38d]  border-4 border-[#2c2c31] text-black hover:text-[#424244]"
+                  className="w-full p-6 rounded-[15px] dark:bg-white hover:bg-[#d0b38d]  border-4 border-[#2c2c31] text-black hover:text-[#424244]"
                   size="lg"
                   disabled={isLoading}
                 >

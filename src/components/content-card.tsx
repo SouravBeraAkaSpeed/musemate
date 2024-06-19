@@ -170,7 +170,7 @@ const ContentCard = ({
 
         {content.isTrending && (
           <div
-            className={`flex  text-[#D5BF90] items-center justify-center ${
+            className={`flex  text-white items-center justify-center ${
               isPopular && "text-sm"
             }`}
           >
@@ -254,10 +254,10 @@ const ContentCard = ({
               </div>
 
               <div className="flex space-x-2">
-                <Button className="flex bg-transparent text-[#c8b896] hover:bg-[#D5BF90] hover:text-black  rounded-[10px]">
+                <Button className="flex bg-transparent text-[#c8b896] hover:bg-gray-500 hover:text-black  rounded-[10px]">
                   <Save />
                 </Button>
-                <Button className="flex bg-transparent text-[#c8b896] hover:bg-[#D5BF90] hover:text-black rounded-[10px]">
+                <Button className="flex bg-transparent text-[#c8b896] hover:bg-gray-500 hover:text-black rounded-[10px]">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Ellipsis />

@@ -34,7 +34,7 @@ export function Hero() {
 
       <Button
         onClick={() => router.push("/explore")}
-        className="flex w-[100px] z-100   bg-[#E3BF90] rounded-[10px] md:mb-[100px] mt-[100px] md:mt-[0px] "
+        className="flex w-[100px] z-100   bg-white rounded-[10px] md:mb-[100px] mt-[100px] md:mt-[0px] "
       >
         Explore
       </Button>

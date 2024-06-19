@@ -173,8 +173,8 @@ const Page = () => {
             <Button
               onClick={() => router.push("/explore")}
               className={`${
-                !feed && "border-2 border-[#D5BF90]"
-              } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90]  m-2 p-2 border-2`}
+                !feed && "border-2 border-white"
+              } bg-transparent text-white rounded-[10px] hover:bg-gray-500  m-2 p-2 border-2`}
             >
               For you
             </Button>
@@ -183,8 +183,8 @@ const Page = () => {
               <Button
                 onClick={() => router.push("/explore?feed=following")}
                 className={`${
-                  feed === "following" && "border-2 border-[#D5BF90]"
-                } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90]  m-2 p-2 border-2`}
+                  feed === "following" && "border-2 border-white"
+                } bg-transparent text-white rounded-[10px] hover:bg-gray-500  m-2 p-2 border-2`}
               >
                 Following
               </Button>
@@ -192,48 +192,48 @@ const Page = () => {
             <Button
               onClick={() => router.push("/explore?feed=Horror")}
               className={`${
-                feed === "Horror" && "border-2 border-[#D5BF90]"
-              } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90] hidden xl:flex m-2 p-2 border-2`}
+                feed === "Horror" && "border-2 border-white"
+              } bg-transparent text-white rounded-[10px] hover:bg-gray-500 hidden xl:flex m-2 p-2 border-2`}
             >
               Horror
             </Button>
             <Button
               onClick={() => router.push("/explore?feed=Thriller")}
               className={`${
-                feed === "Thriller" && "border-2 border-[#D5BF90]"
-              } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90] hidden xl:flex m-2 p-2 border-2`}
+                feed === "Thriller" && "border-2 border-white"
+              } bg-transparent text-white rounded-[10px] hover:bg-gray-500 hidden xl:flex m-2 p-2 border-2`}
             >
               Thriller
             </Button>
             <Button
               onClick={() => router.push("/explore?feed=Action")}
               className={`${
-                feed === "Action" && "border-2 border-[#D5BF90]"
-              } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90] hidden xl:flex m-2 p-2 border-2`}
+                feed === "Action" && "border-2 border-white"
+              } bg-transparent text-white rounded-[10px] hover:bg-gray-500 hidden xl:flex m-2 p-2 border-2`}
             >
               Action
             </Button>
             <Button
               onClick={() => router.push("/explore?feed=ScienceFiction")}
               className={`${
-                feed === "ScienceFiction" && "border-2 border-[#D5BF90]"
-              } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90] hidden xl:flex  m-2 p-2 border-2`}
+                feed === "ScienceFiction" && "border-2 border-white"
+              } bg-transparent text-white rounded-[10px] hover:bg-gray-500 hidden xl:flex  m-2 p-2 border-2`}
             >
               ScienceFiction
             </Button>
             <Button
               onClick={() => router.push("/explore?feed=Mystery")}
               className={`${
-                feed === "Mystery" && "border-2 border-[#D5BF90]"
-              } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90] hidden xl:flex m-2 p-2 border-2`}
+                feed === "Mystery" && "border-2 border-white"
+              } bg-transparent text-white rounded-[10px] hover:bg-gray-500 hidden xl:flex m-2 p-2 border-2`}
             >
               Mystery
             </Button>
             <Button
               onClick={() => router.push("/explore?feed=Trendings")}
               className={`${
-                feed === "Trendings" && "border-2 border-[#D5BF90]"
-              } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90] hidden xl:flex m-2 p-2 border-2`}
+                feed === "Trendings" && "border-2 border-white"
+              } bg-transparent text-white rounded-[10px] hover:bg-gray-500 hidden xl:flex m-2 p-2 border-2`}
             >
               Trendings
             </Button>
@@ -241,7 +241,7 @@ const Page = () => {
             <div className="md:hidden flex ">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="  bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90]  m-2 p-2 border-2 ">
+                  <Button className="  bg-transparent text-white rounded-[10px] hover:bg-gray-500  m-2 p-2 border-2 ">
                     <div>Categories</div>
                   </Button>
                 </DropdownMenuTrigger>
@@ -283,7 +283,7 @@ const Page = () => {
             <div className="flex flex-1  items-center text-[16px] justify-end p-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className=" space-x-2 p-2 bg-transparent text-[#D5BF90] hover:bg-transparent hover:border-0 rounded-[10px] ">
+                  <Button className=" space-x-2 p-2 bg-transparent text-white hover:bg-transparent hover:border-0 rounded-[10px] ">
                     <PenSquare size={20} />
                     <div>Create</div>
                   </Button>

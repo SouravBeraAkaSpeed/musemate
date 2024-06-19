@@ -16,6 +16,7 @@ export async function actionLoginUser({
     email,
     password,
   });
+  console.log(response);
   if (response.error) {
     return {
       error: {

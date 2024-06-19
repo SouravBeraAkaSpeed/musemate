@@ -163,7 +163,7 @@ const Page = () => {
       getfilterContentsByNotFollowing();
     }
     console.log("contents:", contents);
-  }, [state.user, latestContents, feed]);
+  }, [state.user, feed]);
 
   return (
     <div className="flex flex-col w-full">

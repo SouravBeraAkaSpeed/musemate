@@ -152,9 +152,7 @@ const Page = () => {
     
 
     if ("speechSynthesis" in window && text) {
-      toast({
-        title: "speechSynthesis",
-      });
+      
      
       // Wait for voices to be loaded
       const voices = window.speechSynthesis.getVoices();
@@ -162,7 +160,7 @@ const Page = () => {
         window.speechSynthesis.onvoiceschanged = () => {
           speak(text); // Retry speaking after voices are loaded
         };
-        return;
+        
       }
 
       // Cancel any ongoing speech

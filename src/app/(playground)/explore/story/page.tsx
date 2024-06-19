@@ -134,7 +134,20 @@ const Page = () => {
     return { yyyy_mm_dd, month_day_year };
   }
 
-  function speak(text: string | null): void {
+  function speak(htmlString: string | null): void {
+    if (!htmlString) {
+      console.error("No text provided.");
+      return;
+    }
+
+    const stripHtmlTags = (html: string): string => {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      return div.textContent || div.innerText || "";
+    };
+
+    const text = stripHtmlTags(htmlString);
+
     if ("speechSynthesis" in window && text) {
       // Wait for voices to be loaded
       const voices = window.speechSynthesis.getVoices();
@@ -144,7 +157,7 @@ const Page = () => {
         };
         return;
       }
-  
+
       // Cancel any ongoing speech
       if (window.speechSynthesis.speaking) {
         console.log("Cancelling ongoing speech...");
@@ -153,16 +166,18 @@ const Page = () => {
       } else {
         // Create a new speech synthesis utterance instance
         const utterance = new SpeechSynthesisUtterance(text);
-  
+
         // Optionally, you can set properties on the utterance
         // utterance.lang = 'en-US'; // Set the language
         // utterance.pitch = 1; // Set the pitch
         // utterance.rate = 1; // Set the rate (speed)
         // utterance.volume = 1; // Set the volume
-  
+
         // Set callbacks for debugging and state management
         utterance.onstart = () => {
-          console.log("Speech started");
+          toast({
+            title: "Audio Playing..",
+          });
           setIsSpeaking(true);
         };
         utterance.onend = () => {
@@ -173,15 +188,16 @@ const Page = () => {
           console.error("Speech synthesis error", event);
           setIsSpeaking(false);
         };
-  
+
         // Speak the utterance
         window.speechSynthesis.speak(utterance);
       }
     } else {
-      console.error("Sorry, your browser doesn't support text to speech.");
+      toast({
+        title: "Sorry, your browser doesn't support text to speech.",
+      });
     }
   }
-  
 
   useEffect(() => {
     if (story_id) {

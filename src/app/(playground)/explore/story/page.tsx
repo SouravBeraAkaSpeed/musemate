@@ -17,11 +17,100 @@ import {
   toggleLikeContent,
 } from "@/lib/supabase/queries";
 import { contentWithUser } from "@/lib/types";
+import { Content_Type } from "@prisma/client";
 import { Ellipsis, Loader2, Mic, MicOff, Save } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
+
+const useIsSpeaking = () => {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  return [isSpeaking, setIsSpeaking] as const;
+};
+
+const speak = async (
+  htmlString: string | null,
+  isSpeaking: boolean,
+  setIsSpeaking: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+  if (!htmlString) {
+    console.error("No text provided.");
+    return;
+  }
+
+  // Function to strip HTML tags and get plain text
+  const stripHtmlTags = (html: string): string => {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  };
+
+  // Function to split text into chunks
+  const splitTextIntoChunks = (text: string, chunkSize: number): string[] => {
+    const regex = new RegExp(`.{1,${chunkSize}}`, "g");
+    return text.match(regex) || [];
+  };
+
+  const text = stripHtmlTags(htmlString);
+  const chunkSize = 150; // Adjust chunk size based on your needs
+  const textChunks = splitTextIntoChunks(text, chunkSize);
+
+  if ("speechSynthesis" in window && text) {
+    // Wait for voices to be loaded
+    const loadVoices = new Promise((resolve) => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length !== 0) {
+        resolve(voices);
+      } else {
+        window.speechSynthesis.onvoiceschanged = () => {
+          resolve(window.speechSynthesis.getVoices());
+        };
+      }
+    });
+
+    await loadVoices;
+
+    const speakChunk = (chunk: string) => {
+      return new Promise<void>((resolve, reject) => {
+        const utterance = new SpeechSynthesisUtterance(chunk);
+
+        utterance.onstart = () => {
+          console.log("Speech started");
+          setIsSpeaking(true);
+        };
+        utterance.onend = () => {
+          console.log("Speech ended");
+          setIsSpeaking(false);
+          resolve();
+        };
+        utterance.onerror = (event) => {
+          console.error("Speech synthesis error", event);
+          setIsSpeaking(false);
+          reject(event);
+        };
+
+        window.speechSynthesis.speak(utterance);
+      });
+    };
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      for (const chunk of textChunks) {
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          setIsSpeaking(false);
+          break;
+        }
+        await speakChunk(chunk);
+      }
+    }
+  } else {
+    console.error("Sorry, your browser doesn't support text to speech.");
+  }
+};
 
 const Page = () => {
   const { state } = useSupabaseUser();
@@ -30,7 +119,7 @@ const Page = () => {
   const story_id = searchParams.get("id");
   const [content, setcontent] = useState<contentWithUser | null>(null);
   const [authorContents, setAuthorContents] = useState<contentWithUser[]>([]);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useIsSpeaking();
   const [liked, setLiked] = useState<boolean | null>(null);
   const [likes, setLikes] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -115,6 +204,9 @@ const Page = () => {
     }
   };
 
+  const handleButtonClick = (htmlString: string | null) => {
+    speak(htmlString, isSpeaking, setIsSpeaking);
+  };
   function formatDate(date: Date): {
     yyyy_mm_dd: string;
     month_day_year: string;
@@ -135,74 +227,74 @@ const Page = () => {
     return { yyyy_mm_dd, month_day_year };
   }
 
-  const speak = async (htmlString: string | null) => {
-    if (!htmlString) {
-      console.error("No text provided.");
-      return;
-    }
+  // const speak = async (htmlString: string | null) => {
+  //   if (!htmlString) {
+  //     console.error("No text provided.");
+  //     return;
+  //   }
 
-    // Function to strip HTML tags and get plain text
-    const stripHtmlTags = (html: string): string => {
-      const div = document.createElement("div");
-      div.innerHTML = html;
-      return div.textContent || div.innerText || "";
-    };
+  //   // Function to strip HTML tags and get plain text
+  //   const stripHtmlTags = (html: string): string => {
+  //     const div = document.createElement("div");
+  //     div.innerHTML = html;
+  //     return div.textContent || div.innerText || "";
+  //   };
 
-    // Function to split text into chunks
-    const splitTextIntoChunks = (text: string, chunkSize: number): string[] => {
-      const regex = new RegExp(`.{1,${chunkSize}}`, "g");
-      return text.match(regex) || [];
-    };
+  //   // Function to split text into chunks
+  //   const splitTextIntoChunks = (text: string, chunkSize: number): string[] => {
+  //     const regex = new RegExp(`.{1,${chunkSize}}`, "g");
+  //     return text.match(regex) || [];
+  //   };
 
-    const text = stripHtmlTags(htmlString);
-    const chunkSize = 150; // Adjust chunk size based on your needs
-    const textChunks = splitTextIntoChunks(text, chunkSize);
+  //   const text = stripHtmlTags(htmlString);
+  //   const chunkSize = 150; // Adjust chunk size based on your needs
+  //   const textChunks = splitTextIntoChunks(text, chunkSize);
 
-    if ("speechSynthesis" in window && text) {
-      // Wait for voices to be loaded
-      const loadVoices = new Promise((resolve) => {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length !== 0) {
-          resolve(voices);
-        } else {
-          window.speechSynthesis.onvoiceschanged = () => {
-            resolve(window.speechSynthesis.getVoices());
-          };
-        }
-      });
+  //   if ("speechSynthesis" in window && text) {
+  //     // Wait for voices to be loaded
+  //     const loadVoices = new Promise((resolve) => {
+  //       const voices = window.speechSynthesis.getVoices();
+  //       if (voices.length !== 0) {
+  //         resolve(voices);
+  //       } else {
+  //         window.speechSynthesis.onvoiceschanged = () => {
+  //           resolve(window.speechSynthesis.getVoices());
+  //         };
+  //       }
+  //     });
 
-      await loadVoices;
+  //     await loadVoices;
 
-      const speakChunk = (chunk: string) => {
-        return new Promise<void>((resolve, reject) => {
-          const utterance = new SpeechSynthesisUtterance(chunk);
+  //     const speakChunk = (chunk: string) => {
+  //       return new Promise<void>((resolve, reject) => {
+  //         const utterance = new SpeechSynthesisUtterance(chunk);
 
-          utterance.onstart = () => {
-            console.log("Speech started");
-            setIsSpeaking(true);
-          };
-          utterance.onend = () => {
-            console.log("Speech ended");
-            setIsSpeaking(false);
-            resolve();
-          };
-          utterance.onerror = (event) => {
-            console.error("Speech synthesis error", event);
-            setIsSpeaking(false);
-            reject(event);
-          };
+  //         utterance.onstart = () => {
+  //           console.log("Speech started");
+  //           setIsSpeaking(true);
+  //         };
+  //         utterance.onend = () => {
+  //           console.log("Speech ended");
+  //           setIsSpeaking(false);
+  //           resolve();
+  //         };
+  //         utterance.onerror = (event) => {
+  //           console.error("Speech synthesis error", event);
+  //           setIsSpeaking(false);
+  //           reject(event);
+  //         };
 
-          window.speechSynthesis.speak(utterance);
-        });
-      };
+  //         window.speechSynthesis.speak(utterance);
+  //       });
+  //     };
 
-      for (const chunk of textChunks) {
-        await speakChunk(chunk);
-      }
-    } else {
-      console.error("Sorry, your browser doesn't support text to speech.");
-    }
-  };
+  //     for (const chunk of textChunks) {
+  //       await speakChunk(chunk);
+  //     }
+  //   } else {
+  //     console.error("Sorry, your browser doesn't support text to speech.");
+  //   }
+  // };
 
   useEffect(() => {
     if (story_id) {
@@ -290,9 +382,7 @@ const Page = () => {
             </div>
 
             {content.isTrending && (
-              <div
-                className={`flex  text-white items-center justify-center `}
-              >
+              <div className={`flex  text-white items-center justify-center `}>
                 {" "}
                 #OnTrending
               </div>
@@ -325,20 +415,23 @@ const Page = () => {
                       </div>
                     </>
                   )}
-                  <button
-                    className={`flex  items-center justify-center  cursor-pointer`}
-                    onClick={() => speak(content.body)}
-                  >
-                    {isSpeaking ? (
-                      <>
-                        <MicOff className="mx-1" /> Stop
-                      </>
-                    ) : (
-                      <>
-                        <Mic className="mx-1" /> Listen
-                      </>
-                    )}
-                  </button>
+
+                  {content.type !== Content_Type.ART && (
+                    <button
+                      className={`flex  items-center justify-center  cursor-pointer`}
+                      onClick={() => handleButtonClick(content.body)}
+                    >
+                      {isSpeaking ? (
+                        <>
+                          <MicOff className="mx-1" /> Stop
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="mx-1" /> Listen
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -388,6 +481,21 @@ const Page = () => {
                 __html: content.body as string | TrustedHTML,
               }}
             />
+          </div>
+
+          <div className="flex flex-col items-center justify-center md:space-x-10 md:flex-row my-4">
+            {content.pictures &&
+              content.pictures.length > 0 &&
+              content.pictures.map((picture, index) => (
+                <Image
+                  key={index}
+                  src={picture}
+                  alt="content_image"
+                  width={300}
+                  height={300}
+                  className={`rounded-[25px] object-cover w-[300px] h-[300px] md:px-1   py-4`}
+                />
+              ))}
           </div>
 
           <div className="flex my-4 mt-[100px]">

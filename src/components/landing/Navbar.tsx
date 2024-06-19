@@ -22,7 +22,7 @@ export function Navbar({ className }: { className?: string }) {
   };
   return (
     <div
-      className={cn("relative top-10 inset-x-0 w-full mx-auto z-50", className)}
+      className={cn("relative top-10 inset-x-0 w-full md:px-[100px] px-6 z-50", className)}
     >
       <Menu setActive={setActive}>
         <Link

@@ -61,3 +61,17 @@ export const StoryFormSchema = z.object({
     .string()
     .min(100, "The Story Should be atleast 100 characters long."),
 });
+
+export const ArtFormSchema = z.object({
+  title: z
+    .string()
+    .min(5, "Title should be Atleast 5 character long for better Visibility"),
+  pictures: z.array(z.string().url().describe("Pictures Related to Story")),
+  caption: z
+    .string()
+    .min(
+      10,
+      "Caption should be Atleast 10 character long for better Visibility"
+    ),
+  category: z.array(z.string()),
+});

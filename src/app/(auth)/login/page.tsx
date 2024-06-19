@@ -68,6 +68,7 @@ const LoginPage = () => {
     resolver: zodResolver(SignUpFormSchema),
     defaultValues: { email: "", password: "", confirmPassword: "" },
   });
+  const signuploading = Signupform.formState.isSubmitting;
 
   const isLoading = form.formState.isSubmitting;
   const onSubmit: SubmitHandler<z.infer<typeof FormSchema>> = async (
@@ -93,7 +94,7 @@ const LoginPage = () => {
   }: z.infer<typeof FormSchema>) => {
     try {
       const { error } = await actionSignUpUser({ email, password });
-      if (error) {
+      if (error?.message) {
         setSubmitError(error.message);
         router.push(`/login?error_description=${error.message}`);
         form.reset();
@@ -206,7 +207,7 @@ const LoginPage = () => {
               >
                 <Label>Email</Label>
                 <FormField
-                  disabled={isLoading}
+                  disabled={signuploading}
                   control={Signupform.control}
                   name="email"
                   render={({ field }) => (
@@ -226,7 +227,7 @@ const LoginPage = () => {
 
                 <Label>Password</Label>
                 <FormField
-                  disabled={isLoading}
+                  disabled={signuploading}
                   control={Signupform.control}
                   name="password"
                   render={({ field }) => (
@@ -245,7 +246,7 @@ const LoginPage = () => {
                 />
                 <Label>Confirm Password</Label>
                 <FormField
-                  disabled={isLoading}
+                  disabled={signuploading}
                   control={Signupform.control}
                   name="confirmPassword"
                   render={({ field }) => (
@@ -266,9 +267,9 @@ const LoginPage = () => {
                   type="submit"
                   className="w-full p-6 rounded-[15px] dark:bg-white hover:bg-[#d0b38d]  border-4 border-[#2c2c31] text-black hover:text-[#424244]"
                   size="lg"
-                  disabled={isLoading}
+                  disabled={signuploading}
                 >
-                  {!isLoading ? "REGISTER AN ACCOUNT" : <Loader />}
+                  {!signuploading ? "REGISTER AN ACCOUNT" : <Loader />}
                 </Button>
                 {(confirmation || codeExchangeError) && (
                   <>

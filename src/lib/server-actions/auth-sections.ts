@@ -48,10 +48,11 @@ export async function actionSignUpUser({
     },
   });
   const error = response.error;
-  if (error) {
+
+  if (error?.message !== "Error sending confirmation mail") {
     return {
       error: {
-        message: error.message,
+        message: error?.message && "error",
       },
     };
   } else {

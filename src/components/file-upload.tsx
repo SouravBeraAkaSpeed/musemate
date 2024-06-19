@@ -7,9 +7,6 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import { Input } from "./ui/input";
 
-
-
-
 interface ProfileBannerUploadProps {
   onChange: (url?: string) => void;
   value: string | undefined;
@@ -89,9 +86,6 @@ export const ProfileBannerUpload = ({
     />
   );
 };
-
-
-
 
 interface ProfilePictureUploadProps {
   onChange: (url?: string) => void;
@@ -247,5 +241,102 @@ export const StoryPictureUpload = ({
       }}
       value={value}
     />
+  );
+};
+
+interface ArtUploadProps {
+  onChange: (url?: string[]) => void;
+  setUploadingArt: React.Dispatch<React.SetStateAction<boolean>>;
+  value: string[];
+}
+export const ArtUpload = ({
+  onChange,
+  value,
+  setUploadingArt,
+}: ArtUploadProps) => {
+  const { state } = useSupabaseUser();
+  const [profileId, setProfileId] = useState("");
+  let paths: string[] = [];
+
+  useEffect(() => {
+    if (state.user) setProfileId(state.user.id);
+  }, [state]);
+
+  interface onArtsUploadProps {
+    e: React.ChangeEvent<HTMLInputElement>;
+  }
+  const onBankDocumentUpload = async ({ e }: onArtsUploadProps) => {
+    console.log("called");
+    const supabase = createClientComponentClient();
+    if (!profileId) return;
+    console.log(e.target.files);
+    const files = e.target.files;
+
+    if (!files) return;
+
+    setUploadingArt(true);
+    for (let i = 0; i < files.length; i++) {
+      const file = files.item(i);
+      if (file) {
+        console.log(`File name: ${file.name}, size: ${file.size}`);
+        const uuid = v4();
+        setUploadingArt(true);
+        const { data, error } = await supabase.storage
+          .from("art-files")
+          .upload(`artFiles.${file.size}.${profileId}.${uuid}`, file, {
+            cacheControl: "3600",
+            upsert: true,
+          });
+        if (!error) {
+          console.log(data);
+          const url = supabase.storage
+            .from("art-files")
+            .getPublicUrl(`artFiles.${file.size}.${profileId}.${uuid}`)
+            ?.data.publicUrl;
+          const path = url;
+          paths.push(path);
+          console.log(paths);
+          onChange(paths);
+        }
+      }
+    }
+
+    setUploadingArt(false);
+  };
+
+  return (
+    <>
+      {value?.map((v, index) => (
+        <div
+          className="relative flex items-center p-4  rounded-md bg-background/10 border-2 mt-3 "
+          key={index}
+        >
+          <Image
+            src={v}
+            alt="art-image"
+            width={300}
+            height={300}
+            className="w-[300px] h-[300px] object-cover"
+          />
+
+          <button
+            onClick={() => onChange([])}
+            className="bg-rose-500 text-white p-1 rounded-full absolute top-1 right-1 shadow-sm"
+            type="button"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ))}
+      <Input
+        type="file"
+        accept="image/*"
+        className="text-black  mt-2 dark:text-white w-full"
+        onChange={(e) => {
+          onBankDocumentUpload({ e });
+        }}
+        multiple
+      />
+    </>
   );
 };

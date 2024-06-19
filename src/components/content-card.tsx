@@ -20,7 +20,7 @@ import {
 } from "@/lib/supabase/queries";
 import { toast } from "./ui/use-toast";
 import { useSupabaseUser } from "./providers/supabase-user-provider";
-import { Interests } from "@prisma/client";
+import { Content_Type, Interests } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -31,7 +31,7 @@ const ContentCard = ({
 }: {
   content: contentWithUser;
   isPopular: boolean;
-  type:string
+  type: string;
 }) => {
   const { state } = useSupabaseUser();
   const router = useRouter();
@@ -144,7 +144,9 @@ const ContentCard = ({
       <div className="flex items-center  space-x-2 md:p-2 py-2">
         <Link
           href={`/explore/profile?id=${content.authorId}`}
-          className={`flex rounded-full cursor-pointer ${type === "explore" && 'pl-4 md:pl-0' } `}
+          className={`flex rounded-full cursor-pointer ${
+            type === "explore" && "pl-4 md:pl-0"
+          } `}
         >
           <Image
             src={
@@ -179,15 +181,25 @@ const ContentCard = ({
           </div>
         )}
       </div>
-      <div className={`flex ${isPopular ? "p-0" : type === "explore" && "px-4"}`}>
+      <div
+        className={`flex ${isPopular ? "p-0" : type === "explore" && "px-4"}`}
+      >
         <div className="flex  flex-col flex-1">
-          <div className="flex md:flex-row flex-col ">
+          <div
+            className={`flex items-center ${
+              content.type !== Content_Type.ART && !isPopular
+                ? "md:flex-row flex-col"
+                : ""
+            }  ${
+              content.type === Content_Type.ART || isPopular ? "flex-col" : ""
+            } ${isPopular ? " items-center justify-center " : ""}  `}
+          >
             <div
-              className="flex flex-col cursor-pointer "
+              className="flex flex-col cursor-pointer w-[90%] "
               onClick={() => router.push(`/explore/story?id=${content.id}`)}
             >
               <div
-                className={`flex w-full  py-2 ${
+                className={`flex w-full text-justify  py-2 ${
                   isPopular ? "text-md px-2" : "text-lg"
                 } font-bold`}
               >
@@ -205,23 +217,32 @@ const ContentCard = ({
                 </div>
               )}
             </div>
-            <div className="flex md:px-6">
-              {content.pictures && content.pictures.length > 0 && (
-                <Image
-                  src={content.pictures[0]}
-                  alt="content_image"
-                  width={100}
-                  height={100}
-                  className="rounded-[13px] w-full h-full py-2"
-                />
-              )}
+            <div
+              className={`flex ${
+                !isPopular ? "md:flex-row" : ""
+              } flex-col md:px-6 p-2 overflow-hidden`}
+            >
+              {content.pictures &&
+                content.pictures.length > 0 &&
+                content.pictures.map((picture, index) => (
+                  <Image
+                    key={index}
+                    src={picture}
+                    alt="content_image"
+                    width={300}
+                    height={300}
+                    className={`rounded-[25px] object-contain w-full h-full md:px-1 ${
+                      !isPopular && "md:py-0"
+                    } py-4`}
+                  />
+                ))}
             </div>
           </div>
 
           {!isPopular && (
             <div className="flex">
               <div className="flex flex-1  justify-start items-center">
-                <div className="flex flex-col md:flex-row  md:space-y-0 md:space-x-3 md:items-center space-y-2 mt-6 ">
+                <div className="flex flex-col md:flex-row  md:space-y-0 md:space-x-3 md:items-center space-y-2  ">
                   <div className="flex md:space-x-4 space-x-2">
                     <div className="font-bold text-sm">{content.type}</div>
                     {content.category.map((c, index) => (

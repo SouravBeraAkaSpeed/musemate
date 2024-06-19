@@ -11,13 +11,13 @@ export async function actionLoginUser({
   password,
 }: z.infer<typeof FormSchema>) {
   cookies().getAll();
-  
+
   const supabase = createRouteHandlerClient({ cookies });
   const response = await supabase.auth.signInWithPassword({
     email,
     password,
   });
-  const error = response.error
+  const error = response.error;
   if (error) {
     return {
       error: {
@@ -47,7 +47,18 @@ export async function actionSignUpUser({
       emailRedirectTo: `${process.env.NEXT_PUBLIC_URL}/api/auth/callback`,
     },
   });
-  return response;
+  const error = response.error;
+  if (error) {
+    return {
+      error: {
+        message: error.message,
+      },
+    };
+  } else {
+    return {
+      success: true,
+    };
+  }
 }
 
 export async function actionSignOut() {

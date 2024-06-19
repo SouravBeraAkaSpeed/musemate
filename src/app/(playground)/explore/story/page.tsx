@@ -157,8 +157,14 @@ const Page = () => {
       // Wait for voices to be loaded
       const voices = window.speechSynthesis.getVoices();
       if (voices.length === 0) {
+        toast({
+          title: "Audio Playing..",
+        });
         window.speechSynthesis.onvoiceschanged = () => {
           speak(text); // Retry speaking after voices are loaded
+          toast({
+            title: "Audio changed..",
+          });
         };
         
       }

@@ -16,7 +16,17 @@ export async function actionLoginUser({
     email,
     password,
   });
-  return response;
+  if (response.error) {
+    return {
+      error: {
+        message: "error occured in login",
+      },
+    };
+  } else {
+    return {
+      success: true,
+    };
+  }
 }
 
 export async function actionSignUpUser({

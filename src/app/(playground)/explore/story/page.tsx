@@ -140,9 +140,7 @@ const Page = () => {
       return;
     }
 
-    toast({
-      title:"entered",
-    });
+   
 
     const stripHtmlTags = (html: string): string => {
       const div = document.createElement("div");
@@ -156,9 +154,7 @@ const Page = () => {
     });
 
     if ("speechSynthesis" in window && text) {
-      toast({
-        title:"entered",
-      });
+     
       // Wait for voices to be loaded
       const voices = window.speechSynthesis.getVoices();
       if (voices.length === 0) {

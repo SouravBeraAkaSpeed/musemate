@@ -77,28 +77,28 @@ const Page = () => {
   };
 
   const getLatestContent = async () => {
-    if (state.user) {
-      setIsLoading(true);
-      await getLatestTenPost(state.user.id).then((res) => {
-        if (res) {
-          setLatestContents(res.contents);
-          setContents(res.contents);
-          console.log(res);
-          ArrayForFeed(feed);
-        }
-      });
-    }
+    setIsLoading(true);
+    await getLatestTenPost(state.user?.id).then((res) => {
+      if (res) {
+        setLatestContents(res.contents);
+        setContents(res.contents);
+        console.log(res);
+        ArrayForFeed(feed);
+        setIsLoading(false);
+      }
+    });
   };
   useEffect(() => {
     const getfilterContentsByNotFollowing = async () => {
-      if (state.user && latestContents && feed !== "following") {
+      if (latestContents && feed !== "following") {
         setIsLoading(true);
-        await filterContentsByNotFollowing(latestContents, state.user.id).then(
+        await filterContentsByNotFollowing(latestContents, state.user?.id).then(
           (res) => {
             if (res) {
               setNotFollowingContents(res);
               setContents(res);
               console.log(res);
+              ArrayForFeed(feed);
               setIsLoading(false);
             }
           }
@@ -107,9 +107,9 @@ const Page = () => {
     };
 
     const getfilterContentsByFollowing = async () => {
-      if (latestContents && state.user && feed === "following") {
+      if (latestContents && feed === "following") {
         setIsLoading(true);
-        await filterContentsByFollowing(latestContents, state.user.id).then(
+        await filterContentsByFollowing(latestContents, state.user?.id).then(
           (res) => {
             if (res) {
               setFollowingContents(res);
@@ -129,6 +129,7 @@ const Page = () => {
           setPopularContents(res);
           console.log(res);
           ArrayForFeed(feed);
+          setIsLoading(false);
         }
       });
     };
@@ -156,7 +157,8 @@ const Page = () => {
       getContentsByCategory(feed as Interests);
     }
 
-    if (!categories.includes(feed as Interests)) {
+    if (!categories.includes(feed as Interests) && latestContents) {
+      console.log("enter", feed as Interests, categories);
       getfilterContentsByFollowing();
       getfilterContentsByNotFollowing();
     }
@@ -176,14 +178,17 @@ const Page = () => {
             >
               For you
             </Button>
-            <Button
-              onClick={() => router.push("/explore?feed=following")}
-              className={`${
-                feed === "following" && "border-2 border-[#D5BF90]"
-              } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90]  m-2 p-2 border-2`}
-            >
-              Following
-            </Button>
+
+            {state.user && (
+              <Button
+                onClick={() => router.push("/explore?feed=following")}
+                className={`${
+                  feed === "following" && "border-2 border-[#D5BF90]"
+                } bg-transparent text-white rounded-[10px] hover:bg-[#D5BF90]  m-2 p-2 border-2`}
+              >
+                Following
+              </Button>
+            )}
             <Button
               onClick={() => router.push("/explore?feed=Horror")}
               className={`${
@@ -316,7 +321,12 @@ const Page = () => {
           ) : (
             <div className="flex flex-col my-10 min-h-screen">
               {contents.map((content, index) => (
-                <ContentCard type="explore" key={index} content={content} isPopular={false} />
+                <ContentCard
+                  type="explore"
+                  key={index}
+                  content={content}
+                  isPopular={false}
+                />
               ))}
 
               {contents.length === 0 && (
@@ -331,7 +341,12 @@ const Page = () => {
           <div className="flex font-bold p-4">Popular Stories</div>
           <hr />
           {popularContents.map((content, index) => (
-            <ContentCard type="explore" key={index} content={content} isPopular={true} />
+            <ContentCard
+              type="explore"
+              key={index}
+              content={content}
+              isPopular={true}
+            />
           ))}
         </div>
       </div>

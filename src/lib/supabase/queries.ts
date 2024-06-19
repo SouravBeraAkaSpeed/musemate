@@ -22,31 +22,23 @@ export const onBoardUser = async (user: user) => {
   }
 };
 
-export const getLatestTenPost = async (authorId: string, index?: number) => {
+export const getLatestTenPost = async (authorId?: string, index?: number) => {
   try {
-    if (authorId) {
-      const contents = await db.content.findMany({
-        where: {
-          NOT: {
-            authorId: authorId,
-          },
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 15,
-        skip: index ?? 0,
-        include: {
-          author: true,
-        },
-      });
+    const contents = await db.content.findMany({
+      where: authorId ? { NOT: { authorId } } : {},
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 15,
+      skip: index ?? 0,
+      include: {
+        author: true,
+      },
+    });
 
-      const nextIndex = (index ?? 0) + 10;
+    const nextIndex = (index ?? 0) + 10;
 
-      return { contents, nextIndex };
-    } else {
-      return null;
-    }
+    return { contents, nextIndex };
   } catch (error) {
     console.error("Error fetching contents:", error);
     throw error;
@@ -55,9 +47,11 @@ export const getLatestTenPost = async (authorId: string, index?: number) => {
 
 export const filterContentsByFollowing = async (
   contents: contentWithUser[],
-  userId: string
+  userId?: string
 ) => {
   try {
+    if (!userId) return contents;
+
     const followedAuthors = await db.userConnection.findMany({
       where: {
         followerId: userId,
@@ -84,9 +78,11 @@ export const filterContentsByFollowing = async (
 
 export const filterContentsByNotFollowing = async (
   contents: contentWithUser[],
-  userId: string
+  userId?: string
 ) => {
   try {
+    if (!userId) return contents;
+
     const followedAuthors = await db.userConnection.findMany({
       where: {
         followerId: userId,
@@ -107,6 +103,26 @@ export const filterContentsByNotFollowing = async (
     return filteredContents;
   } catch (error) {
     console.error("Error filtering contents:", error);
+    return null;
+  }
+};
+
+export const getContentByCategory = async (category: Interests) => {
+  try {
+    const contents = await db.content.findMany({
+      where: {
+        category: {
+          has: category,
+        },
+      },
+      include: {
+        author: true,
+      },
+    });
+
+    return contents;
+  } catch (error) {
+    console.error("Error fetching contents:", error);
     return null;
   }
 };
@@ -139,26 +155,6 @@ export const getPopularContents = async () => {
   } catch (error) {
     console.error("Error fetching contents:", error);
     throw error;
-  }
-};
-
-export const getContentByCategory = async (category: Interests) => {
-  try {
-    const contents = await db.content.findMany({
-      where: {
-        category: {
-          has: category,
-        },
-      },
-      include: {
-        author: true,
-      },
-    });
-
-    return contents;
-  } catch (error) {
-    console.error("Error fetching contents:", error);
-    return null;
   }
 };
 

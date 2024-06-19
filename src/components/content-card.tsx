@@ -58,6 +58,11 @@ const ContentCard = ({
 
   const handleLikeToggle = async () => {
     try {
+      if (!state.user) {
+        toast({
+          title: "Login to like to post",
+        });
+      }
       if (state.user) {
         const message = await toggleLikeContent(state.user.id, content.id);
         console.log(message);

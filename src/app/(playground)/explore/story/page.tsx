@@ -85,6 +85,11 @@ const Page = () => {
 
   const handleLikeToggle = async () => {
     try {
+      if (!state.user) {
+        toast({
+          title: "Login to like to post",
+        });
+      }
       if (state.user && story_id) {
         const message = await toggleLikeContent(state.user.id, story_id);
         console.log(message);
@@ -164,18 +169,19 @@ const Page = () => {
       };
 
       const getContents = async () => {
-        if (state.user) {
-          const contents = await getContentByUser(state.user.id);
+        if (content) {
+          const contents = await getContentByUser(content.authorId);
           if (contents) {
             setAuthorContents(contents);
           }
         }
       };
-
-      getStory();
+      if (!content) {
+        getStory();
+      }
       getContents();
     }
-  }, [story_id, state.user]);
+  }, [story_id, content]);
 
   if (!content) {
     return (

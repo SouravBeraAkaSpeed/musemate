@@ -134,7 +134,7 @@ const Page = () => {
     return { yyyy_mm_dd, month_day_year };
   }
 
-  function speak(htmlString: string | null): void {
+  const  speak = async (htmlString: string | null) => {
     if (!htmlString) {
       console.error("No text provided.");
       return;

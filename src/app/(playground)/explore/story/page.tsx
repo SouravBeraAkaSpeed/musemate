@@ -201,7 +201,9 @@ const Page = () => {
       return div.textContent || div.innerText || "";
     };
 
-    const text = stripHtmlTags(htmlString);
+    const text = stripHtmlTags(htmlString).trim().replaceAll("\n","");
+
+    console.log(text);
 
     if (text) {
       await speaks(text);

@@ -135,7 +135,29 @@ const Page = () => {
     return { yyyy_mm_dd, month_day_year };
   }
 
-  const speaks = async (text: string | null) => {
+  const speak = async (htmlString: string | null) => {
+    if (!htmlString) {
+      console.error("No text provided.");
+      return;
+    }
+
+    // Function to strip HTML tags and get plain text
+    const stripHtmlTags = (html: string): string => {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      return div.textContent || div.innerText || "";
+    };
+
+    // Function to split text into chunks
+    const splitTextIntoChunks = (text: string, chunkSize: number): string[] => {
+      const regex = new RegExp(`.{1,${chunkSize}}`, "g");
+      return text.match(regex) || [];
+    };
+
+    const text = stripHtmlTags(htmlString);
+    const chunkSize = 150; // Adjust chunk size based on your needs
+    const textChunks = splitTextIntoChunks(text, chunkSize);
+
     if ("speechSynthesis" in window && text) {
       // Wait for voices to be loaded
       const loadVoices = new Promise((resolve) => {
@@ -151,62 +173,34 @@ const Page = () => {
 
       await loadVoices;
 
-      // Cancel any ongoing speech
-      if (window.speechSynthesis.speaking) {
-        console.log("Cancelling ongoing speech...");
-        window.speechSynthesis.cancel();
-        setIsSpeaking(false);
-      } else {
-        // Create a new speech synthesis utterance instance
-        const utterance = new SpeechSynthesisUtterance(text);
+      const speakChunk = (chunk: string) => {
+        return new Promise<void>((resolve, reject) => {
+          const utterance = new SpeechSynthesisUtterance(chunk);
 
-        // Set optional properties on the utterance
-        // utterance.lang = 'en-US'; // Set the language
-        // utterance.pitch = 1; // Set the pitch
-        // utterance.rate = 1; // Set the rate (speed)
-        // utterance.volume = 1; // Set the volume
+          utterance.onstart = () => {
+            console.log("Speech started");
+            setIsSpeaking(true);
+          };
+          utterance.onend = () => {
+            console.log("Speech ended");
+            setIsSpeaking(false);
+            resolve();
+          };
+          utterance.onerror = (event) => {
+            console.error("Speech synthesis error", event);
+            setIsSpeaking(false);
+            reject(event);
+          };
 
-        // Set callbacks for debugging and state management
-        utterance.onstart = () => {
-          console.log("Speech started");
-          setIsSpeaking(true);
-        };
-        utterance.onend = () => {
-          console.log("Speech ended");
-          setIsSpeaking(false);
-        };
-        utterance.onerror = (event) => {
-          console.error("Speech synthesis error", event);
-          setIsSpeaking(false);
-        };
+          window.speechSynthesis.speak(utterance);
+        });
+      };
 
-        // Speak the utterance
-        window.speechSynthesis.speak(utterance);
+      for (const chunk of textChunks) {
+        await speakChunk(chunk);
       }
     } else {
       console.error("Sorry, your browser doesn't support text to speech.");
-    }
-  };
-
-  const speak = async (htmlString: string | null) => {
-    if (!htmlString) {
-      console.error("No text provided.");
-      return;
-    }
-
-    // Strip HTML tags and get plain text
-    const stripHtmlTags = (html: string): string => {
-      const div = document.createElement("div");
-      div.innerHTML = html;
-      return div.textContent || div.innerText || "";
-    };
-
-    const text = stripHtmlTags(htmlString).trim().replaceAll("\n","");
-
-    console.log(text);
-
-    if (text) {
-      await speaks(text);
     }
   };
 

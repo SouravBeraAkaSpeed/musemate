@@ -123,7 +123,7 @@ const Page = () => {
   return (
     <div className="flex flex-col  items-center justify-center w-full ">
       <div
-        className="flex flex-col md:min-w-[600px] h-full border-2 
+        className="flex flex-col md:min-w-[600px] w-[90%] md:w-[50%] h-full border-2 
         shadow-lg mt-10 rounded-[10px] mb-10"
       >
         <div className="w-full p-5 flex flex-col">

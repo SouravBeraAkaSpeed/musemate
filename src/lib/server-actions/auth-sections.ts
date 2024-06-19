@@ -11,17 +11,17 @@ export async function actionLoginUser({
   password,
 }: z.infer<typeof FormSchema>) {
   cookies().getAll();
-  console.log(email,password)
+  
   const supabase = createRouteHandlerClient({ cookies });
   const response = await supabase.auth.signInWithPassword({
     email,
     password,
   });
-  console.log(response);
-  if (response.error) {
+  const error = response.error
+  if (error) {
     return {
       error: {
-        message: "error occured in login",
+        message: error.message,
       },
     };
   } else {

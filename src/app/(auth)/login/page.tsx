@@ -109,9 +109,9 @@ const LoginPage = () => {
     }
   };
   return (
-    <div className="z-10 flex flex-col items-center justify-center h-[550px]  w-[90%]   md:w-[450px] min-h-20 rounded-[20px] border border-white/10 backdrop-blur-md relative">
+    <div className="z-10 flex flex-col items-center justify-center h-[550px]  w-[90%] md:w-[450px]  min-h-20 rounded-[20px] border border-white/10 backdrop-blur-md relative">
       <div className="absolute left-0 right-0 flex items-center justify-center -top-20">
-        <div className="flex flex-col items-center top-[40px] relative justify-center h-32 w-32 rounded-full ">
+        <div className="flex flex-col items-center top-[40px] relative justify-center h-32 w-full rounded-full ">
           <Link
             href={"/"}
             className="flex flex-col space-y-4 mt-[120px] font-bold text-2xl text-[#E3BF90]"
@@ -120,8 +120,8 @@ const LoginPage = () => {
           </Link>
         </div>
       </div>
-      <div className="mt-[140px]">
-        <Tabs defaultValue="login" className="w-[90%]   md:w-[400px]">
+      <div className="mt-[140px] w-full px-6">
+        <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2 rounded-xl ">
             <TabsTrigger className=" text-white rounded-xl " value="login">
               Login
@@ -138,7 +138,7 @@ const LoginPage = () => {
                   if (submitError) setSubmitError("");
                 }}
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="w-full sm:justify-center sm:w-[400px] space-y-4 flex flex-col"
+                className="w-full sm:justify-center  space-y-4 flex flex-col"
               >
                 <Label>Email</Label>
                 <FormField

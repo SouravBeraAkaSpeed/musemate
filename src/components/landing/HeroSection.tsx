@@ -57,7 +57,7 @@ export function Hero() {
       <div className="flex-col md:my-0 my-[100px] w-full h-full flex items-center justify-center ">
         <div className="flex font-bold p-4">Today&apos;s Popular Stories</div>
 
-        <div className="flex  md:flex-row flex-col items-center justify-center w-full px-[100px]">
+        <div className="flex  md:flex-row flex-col items-center justify-center w-full md:px-[100px] px-5 md:space-y-0 space-y-10">
           {isLoading && (
             <div className="flex text-white flex-1 justify-center items-center h-[300px]">
               <Loader2 className="h-7 w-7 text-white animate-spin my-4" />
@@ -67,7 +67,7 @@ export function Hero() {
           {popularContents.slice(0, 3).map((content, index) => (
             <Link
               href={`/explore/story?id=${content.id}`}
-              className="flex md:w-1/3 cursor-pointer  w-full items-center justify-center flex-col mx-4"
+              className="flex md:w-1/3 cursor-pointer  w-full items-center justify-center flex-col mx-4 "
               key={index}
             >
               <div className="flex text-lg w-full text-justify justify-center items-center font-bold">
@@ -75,7 +75,7 @@ export function Hero() {
               </div>
               <div className="flex text-md w-full justify-center items-center my-4 ">
                 {content.description &&
-                  content.description?.substring(1, 40) + "..."}
+                  content.description?.substring(0, 40) + "..."}
               </div>
               <div className="flex w-full items-center justify-center ">
                 <Image

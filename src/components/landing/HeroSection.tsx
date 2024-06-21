@@ -1,22 +1,44 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ContainerScroll } from "../ui/container-scroll-animation";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { contentWithUser } from "@/lib/types";
+import { getPopularContents } from "@/lib/supabase/queries";
+import ContentCard from "../content-card";
+import { Loader2 } from "lucide-react";
 
 export function Hero() {
   const router = useRouter();
+  const [popularContents, setPopularContents] = useState<contentWithUser[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const getPopularContent = async () => {
+      setIsLoading(true);
+      await getPopularContents().then((res) => {
+        if (res) {
+          setPopularContents(res);
+          console.log(res);
+          setIsLoading(false);
+        }
+      });
+    };
+
+    getPopularContent();
+  }, []);
+
   return (
     <div className="flex flex-col overflow-hidden top-20 md:top-0 items-center py-10">
       <ContainerScroll
         titleComponent={
           <>
             <h1 className="text-4xl font-semibold text-black dark:text-white">
-              Unleash the realm of <br />
+              The world&apos;s most positive platform <br />
               <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
-                Infinite Stories
+                for Artist to engage Peoples .
               </span>
             </h1>
           </>
@@ -32,9 +54,46 @@ export function Hero() {
         />
       </ContainerScroll>
 
+      <div className="flex-col md:my-0 my-[100px] w-full h-full flex items-center justify-center ">
+        <div className="flex font-bold p-4">Today's Popular Stories</div>
+
+        <div className="flex  md:flex-row flex-col items-center justify-center w-full px-[100px]">
+          {isLoading && (
+            <div className="flex text-white flex-1 justify-center items-center h-[300px]">
+              <Loader2 className="h-7 w-7 text-white animate-spin my-4" />
+              <p className="text-xs text-white ">Loading ...</p>
+            </div>
+          )}
+          {popularContents.slice(0, 3).map((content, index) => (
+            <Link
+              href={`/explore/story?id=${content.id}`}
+              className="flex md:w-1/3 cursor-pointer  w-full items-center justify-center flex-col mx-4"
+              key={index}
+            >
+              <div className="flex text-lg w-full text-justify justify-center items-center font-bold">
+                {content.caption}
+              </div>
+              <div className="flex text-md w-full justify-center items-center my-4 ">
+                {content.description &&
+                  content.description?.substring(1, 40) + "..."}
+              </div>
+              <div className="flex w-full items-center justify-center ">
+                <Image
+                  src={content.pictures[0]}
+                  alt="popular_image"
+                  width={300}
+                  height={300}
+                  className="w-[300px] h-[300px] object-cover rounded-[10px]"
+                />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <Button
         onClick={() => router.push("/explore")}
-        className="flex w-[100px] z-100   bg-white rounded-[10px] md:mb-[100px] mt-[100px] md:mt-[0px] "
+        className="flex w-[100px] z-100   bg-white rounded-[10px] md:mb-[100px]   "
       >
         Explore
       </Button>

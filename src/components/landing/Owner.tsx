@@ -29,7 +29,7 @@ const Owner = () => {
             className="w-[300px] h-[300px] object-cover rounded-[10px] shadow-lg shadow-gray-500"
           />
           <div className="flex  mt-4 text-lg">Arayn kumar singh</div>
-          <div className="flex my-1">CTO , Mentor</div>
+          <div className="flex my-1">Co-Founder and CTO</div>
         </div>
       </div>
     </div>

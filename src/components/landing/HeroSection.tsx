@@ -36,9 +36,9 @@ export function Hero() {
         titleComponent={
           <>
             <h1 className="text-4xl font-semibold text-black dark:text-white">
-              The world&apos;s most positive platform <br />
+              The world&apos;s most positive platform for<br />
               <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
-                for Artist to engage Peoples .
+                Artist to engage Peoples
               </span>
             </h1>
           </>

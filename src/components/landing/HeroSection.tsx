@@ -55,7 +55,7 @@ export function Hero() {
       </ContainerScroll>
 
       <div className="flex-col md:my-0 my-[100px] w-full h-full flex items-center justify-center ">
-        <div className="flex font-bold p-4">Today's Popular Stories</div>
+        <div className="flex font-bold p-4">Today&apos;s Popular Stories</div>
 
         <div className="flex  md:flex-row flex-col items-center justify-center w-full px-[100px]">
           {isLoading && (

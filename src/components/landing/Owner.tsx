@@ -2,8 +2,8 @@ import Image from "next/image";
 import React from "react";
 
 const Owner = () => {
-  return (
-    <div className="flex flex-col w-full items-center justify-center ">
+  return ( 
+    <div className="flex flex-col w-full my-[100px] items-center justify-center ">
       <div className="flex w-full p-10 text-3xl font-bold items-center justify-center">
         Owners
       </div>

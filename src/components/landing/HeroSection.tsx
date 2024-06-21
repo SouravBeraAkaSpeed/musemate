@@ -38,7 +38,7 @@ export function Hero() {
             <h1 className="text-4xl font-semibold text-black dark:text-white">
               The world&apos;s most positive platform for<br />
               <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
-                Artist to engage Peoples
+                <span className="text-red-500">Artist</span> to engage <span className="text-red-500">Peoples</span>
               </span>
             </h1>
           </>

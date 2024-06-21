@@ -1,5 +1,6 @@
 import { About } from "@/components/landing/About";
 import Communities from "@/components/landing/Communities";
+import Footer from "@/components/landing/Footer";
 import { Hero } from "@/components/landing/HeroSection";
 import Owner from "@/components/landing/Owner";
 
@@ -9,6 +10,7 @@ export default function Home() {
       <Hero />
       <About />
       <Owner/>
+      
     </main>
   );
 }

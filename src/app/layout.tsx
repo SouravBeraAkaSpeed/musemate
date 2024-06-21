@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Navbar } from "@/components/landing/Navbar";
 import { SupabaseUserProvider } from "@/components/providers/supabase-user-provider";
 import { Toaster } from "@/components/ui/toaster";
+import Footer from "@/components/landing/Footer";
 
 const font = Open_Sans({ subsets: ["latin"] });
 
@@ -30,6 +31,7 @@ export default function RootLayout({
             <Navbar className="top-2" />
             <Toaster/>
             {children}
+            <Footer/>
           </ThemeProvider>
         </SupabaseUserProvider>
       </body>

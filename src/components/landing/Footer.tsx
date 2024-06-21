@@ -10,7 +10,7 @@ const Footer = () => {
             <span className=" text-xl">MuseMate</span>
           </a>
           <p className="mt-2 text-sm text-gray-500">
-            The world's most positive platform for Artist to engage Peoples
+            The world&apos;s most positive platform for Artist to engage Peoples
           </p>
         </div>
         <div className="flex-grow flex flex-wrap md:pl-20 -mb-10 md:mt-0 mt-10 md:text-right text-center">

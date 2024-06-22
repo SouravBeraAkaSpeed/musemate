@@ -40,11 +40,12 @@ export async function actionSignUpUser({
   const { data } = await supabase.from("users").select("*").eq("email", email);
 
   if (data?.length) return { error: { message: "User already exists", data } };
+  const baseUrl = process.env.NEXT_PUBLIC_URL;
   const response = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_URL}/api/auth/callback`,
+      emailRedirectTo: `${baseUrl}/api/auth/callback`,
     },
   });
   const error = response.error;

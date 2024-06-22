@@ -82,7 +82,6 @@ const Page = () => {
       if (res) {
         setLatestContents(res.contents);
         setContents(res.contents);
-        console.log(res);
         ArrayForFeed(feed);
         setIsLoading(false);
       }
@@ -97,7 +96,6 @@ const Page = () => {
             if (res) {
               setNotFollowingContents(res);
               setContents(res);
-              console.log(res);
               ArrayForFeed(feed);
               setIsLoading(false);
             }
@@ -113,7 +111,6 @@ const Page = () => {
           (res) => {
             if (res) {
               setFollowingContents(res);
-              console.log(res);
               setContents(res);
               setIsLoading(false);
             }
@@ -127,7 +124,6 @@ const Page = () => {
       await getPopularContents().then((res) => {
         if (res) {
           setPopularContents(res);
-          console.log(res);
           ArrayForFeed(feed);
           setIsLoading(false);
         }
@@ -139,7 +135,6 @@ const Page = () => {
       await getContentByCategory(category).then((res) => {
         if (res) {
           setCategoryContent(res);
-          console.log(res);
           setContents(res);
           setIsLoading(false);
         }
@@ -147,22 +142,19 @@ const Page = () => {
     };
 
     if (latestContents.length === 0) {
-      getLatestContent();
-      getPopularContent();
+      getLatestContent().then((res) => {
+        getPopularContent();
+      });
     }
 
     const categories = Object.values(Interests);
-    console.log(categories.includes(feed as Interests));
     if (feed && categories.includes(feed as Interests)) {
       getContentsByCategory(feed as Interests);
     }
-
-    if (!categories.includes(feed as Interests) && latestContents) {
-      console.log("enter", feed as Interests, categories);
+    if (!categories.includes(feed as Interests)) {
       getfilterContentsByFollowing();
       getfilterContentsByNotFollowing();
     }
-    console.log("contents:", contents);
   }, [state.user, feed]);
 
   return (
@@ -320,20 +312,31 @@ const Page = () => {
             </div>
           ) : (
             <div className="flex flex-col my-10 min-h-screen">
-              {contents.map((content, index) => (
-                <ContentCard
-                  type="explore"
-                  key={index}
-                  content={content}
-                  isPopular={false}
-                />
-              ))}
+              {!feed
+                ? latestContents.map((content, index) => (
+                    <ContentCard
+                      type="explore"
+                      key={index}
+                      content={content}
+                      isPopular={false}
+                    />
+                  ))
+                : contents.map((content, index) => (
+                    <ContentCard
+                      type="explore"
+                      key={index}
+                      content={content}
+                      isPopular={false}
+                    />
+                  ))}
 
-              {contents.length === 0 && (
-                <div className="flex text-xl font-bold items-center justify-center">
-                  😔 No Stories available in this genre
-                </div>
-              )}
+              {contents.length === 0 &&
+                latestContents.length === 0 &&
+                !feed && (
+                  <div className="flex text-xl font-bold items-center justify-center">
+                    😔 No Stories available in this genre
+                  </div>
+                )}
             </div>
           )}
         </div>

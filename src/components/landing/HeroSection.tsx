@@ -93,7 +93,7 @@ export function Hero() {
 
       <Button
         onClick={() => router.push("/explore")}
-        className="flex w-[100px] z-100   bg-white rounded-[10px] md:mb-[100px]   "
+        className="flex w-[100px] z-100  md:mt-10 mt-4 bg-white rounded-[10px] md:mb-[100px]   "
       >
         Explore
       </Button>

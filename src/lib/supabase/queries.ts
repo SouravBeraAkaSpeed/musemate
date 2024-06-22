@@ -33,6 +33,23 @@ export const getLatestTenPost = async (authorId?: string, index?: number) => {
       skip: index ?? 0,
       include: {
         author: true,
+        comments: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            author: true,
+            children: {
+              include: {
+                author: true,
+              },
+              orderBy: {
+                createdAt: "desc",
+              },
+            },
+          },
+          take: 3, // Limit to top 3 popular comments for each content
+        },
       },
     });
 
@@ -44,6 +61,29 @@ export const getLatestTenPost = async (authorId?: string, index?: number) => {
     throw error;
   }
 };
+
+// export const getLatestTenPost = async (authorId?: string, index?: number) => {
+//   try {
+//     const contents = await db.content.findMany({
+//       where: authorId ? { NOT: { authorId } } : {},
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//       take: 15,
+//       skip: index ?? 0,
+//       include: {
+//         author: true,
+//       },
+//     });
+
+//     const nextIndex = (index ?? 0) + 10;
+
+//     return { contents, nextIndex };
+//   } catch (error) {
+//     console.error("Error fetching contents:", error);
+//     throw error;
+//   }
+// };
 
 export const filterContentsByFollowing = async (
   contents: contentWithUser[],
@@ -117,6 +157,22 @@ export const getContentByCategory = async (category: Interests) => {
       },
       include: {
         author: true,
+        comments: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            author: true,
+            children: {
+              include: {
+                author: true,
+              },
+              orderBy: {
+                createdAt: "desc",
+              },
+            },
+          },
+        },
       },
     });
 
@@ -145,6 +201,22 @@ export const getPopularContents = async () => {
         take: 5,
         include: {
           author: true,
+          comments: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            include: {
+              author: true,
+              children: {
+                include: {
+                  author: true,
+                },
+                orderBy: {
+                  createdAt: "desc",
+                },
+              },
+            },
+          },
         },
       });
 
@@ -205,6 +277,62 @@ export const createStory = async (data: content) => {
   }
 };
 
+export const addCommentToContent = async (data: {
+  body: string;
+  authorId: string;
+  contentId: string;
+}) => {
+  try {
+    const newComment = await db.comment.create({
+      data: {
+        body: data.body,
+        authorId: data.authorId,
+        contentId: data.contentId,
+      },
+    });
+
+    // Update the comments count in the content
+    await db.content.update({
+      where: { id: data.contentId },
+      data: { commentsCount: { increment: 1 } },
+    });
+
+    return newComment;
+  } catch (error) {
+    console.log("ERROR_AT_ADD_COMMENT_TO_CONTENT", error);
+    return null;
+  }
+};
+
+export const addReplyToComment = async (data: {
+  body: string;
+  authorId: string;
+  contentId: string;
+  parentId: string;
+}) => {
+  try {
+    const newReply = await db.comment.create({
+      data: {
+        body: data.body,
+        authorId: data.authorId,
+        contentId: data.contentId,
+        parentId: data.parentId,
+      },
+    });
+
+    // Update the comments count in the content
+    await db.content.update({
+      where: { id: data.contentId },
+      data: { commentsCount: { increment: 1 } },
+    });
+
+    return newReply;
+  } catch (error) {
+    console.log("ERROR_AT_ADD_REPLY_TO_COMMENT", error);
+    return null;
+  }
+};
+
 export const getContent = async (id: string) => {
   try {
     if (id) {
@@ -214,6 +342,22 @@ export const getContent = async (id: string) => {
         },
         include: {
           author: true,
+          comments: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            include: {
+              author: true,
+              children: {
+                include: {
+                  author: true,
+                },
+                orderBy: {
+                  createdAt: "desc",
+                },
+              },
+            },
+          },
         },
       });
 
@@ -238,9 +382,24 @@ export const getContentByUser = async (id: string) => {
           createdAt: "desc",
         },
         take: 4,
-
         include: {
           author: true,
+          comments: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            include: {
+              author: true,
+              children: {
+                include: {
+                  author: true,
+                },
+                orderBy: {
+                  createdAt: "desc",
+                },
+              },
+            },
+          },
         },
       });
 
@@ -259,7 +418,6 @@ export const getUserDetails = async (
   cursor: string | undefined
 ) => {
   try {
-    // Fetch user data
     if (id) {
       const take = 5;
       const user = await db.public_users.findUnique({
@@ -267,10 +425,29 @@ export const getUserDetails = async (
         include: {
           contents: {
             take,
-            skip: cursor ? 1 : 0, // Skip the cursor itself if provided
+            skip: cursor ? 1 : 0,
             cursor: cursor ? { id: cursor } : undefined,
             orderBy: {
               createdAt: "desc",
+            },
+            include: {
+              author: true,
+              comments: {
+                orderBy: {
+                  createdAt: "desc",
+                },
+                include: {
+                  author: true,
+                  children: {
+                    include: {
+                      author: true,
+                    },
+                    orderBy: {
+                      createdAt: "desc",
+                    },
+                  },
+                },
+              },
             },
           },
         },

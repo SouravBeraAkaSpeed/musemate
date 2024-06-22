@@ -285,6 +285,22 @@ export type user = {
   id?: string;
 };
 
+export type comment = {
+  id: string;
+  body: string;
+  authorId: string;
+  contentId: string;
+  parentId: string | null;
+  createdAt: Date;
+  modifiedAt: Date;
+  author: user;
+  children?: commentWithChildren[];
+};
+
+export type commentWithChildren = comment & {
+  children?: commentWithChildren[];
+};
+
 export type content = {
   authorId: string;
   body: string | null;
@@ -302,7 +318,10 @@ export type content = {
   type: Content_Type;
   visibility_type: Visibility_type;
   isTrending: boolean;
-  comments: number;
+  commentsCount: number;
 };
 
-export type contentWithUser = content & { author: user };
+export type contentWithUser = content & {
+  author: user;
+  comments?: commentWithChildren[];
+};

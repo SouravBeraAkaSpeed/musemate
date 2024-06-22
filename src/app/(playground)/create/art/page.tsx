@@ -92,7 +92,7 @@ const Page = () => {
         savedBy: 0,
         likes: 0,
         total_voters: 0,
-        comments: 0,
+        commentsCount: 0,
         type: Content_Type.ART,
         visibility_type: Visibility_type.Public,
         createdAt: new Date(),

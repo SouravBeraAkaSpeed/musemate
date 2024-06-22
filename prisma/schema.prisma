@@ -367,6 +367,7 @@ model public_users {
   following       UserConnection[] @relation("following")
   contents        Content[]
   contentLikes    ContentLike[]
+  comments        Comment[]
   createdAt       DateTime         @default(now())
   modifiedAt      DateTime         @default(now()) @updatedAt
 
@@ -421,9 +422,10 @@ model Content {
   modifiedAt      DateTime        @default(now()) @updatedAt
   Poll_options    Poll_options[]
   contentLikes    ContentLike[]
+  comments        Comment[]
   total_voters    Int             @default(0)
   isTrending      Boolean         @default(false)
-  comments        Int             @default(0)
+  commentsCount   Int             @default(0)
 
   @@index([authorId])
   @@map("contents")
@@ -452,5 +454,25 @@ model ContentLike {
   @@unique([userId, contentId])
   @@index([userId])
   @@index([contentId])
+  @@schema("public")
+}
+
+
+model Comment {
+  id          String       @id @default(uuid())
+  body        String
+  authorId    String
+  contentId   String
+  parentId    String?      // For nested comments
+  author      public_users @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content     Content      @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  parent      Comment?     @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  children    Comment[]    @relation("CommentToComment")
+  createdAt   DateTime     @default(now())
+  modifiedAt  DateTime     @default(now()) @updatedAt
+
+  @@index([authorId])
+  @@index([contentId])
+  @@index([parentId])
   @@schema("public")
 }

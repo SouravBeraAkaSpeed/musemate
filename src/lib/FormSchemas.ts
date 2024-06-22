@@ -75,3 +75,7 @@ export const ArtFormSchema = z.object({
     ),
   category: z.array(z.string()),
 });
+
+export const CommentForm = z.object({
+  body: z.string(),
+});

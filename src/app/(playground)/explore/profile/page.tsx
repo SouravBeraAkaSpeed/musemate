@@ -165,10 +165,10 @@ const Page = () => {
                   />
                   {state.user?.id === profile_id && (
                     <div className="w-full flex justify-end my-2">
-                      <div className="flex ">
+                      <Link href={"/onboarding/create-profile"} className="flex ">
                         {" "}
-                        Change Banner <Edit className="ml-2" />
-                      </div>
+                        Edit Profile <Edit className="ml-2" />
+                      </Link>
                     </div>
                   )}
                 </div>

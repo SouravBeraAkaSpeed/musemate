@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import {
+  addCommentToContent,
+  addReplyToComment,
   checkIfLiked,
   followUser,
   getContent,
@@ -16,13 +18,25 @@ import {
   getContentLikes,
   toggleLikeContent,
 } from "@/lib/supabase/queries";
-import { contentWithUser } from "@/lib/types";
+import { commentWithChildren, contentWithUser } from "@/lib/types";
 import { Content_Type } from "@prisma/client";
 import { Ellipsis, Loader2, Mic, MicOff, Save } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
+import { CommentForm } from "@/lib/FormSchemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 const useIsSpeaking = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -123,6 +137,66 @@ const Page = () => {
   const [liked, setLiked] = useState<boolean | null>(null);
   const [likes, setLikes] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [replyToCommentId, setReplyToCommentId] = useState<string>("");
+  const [showComments, setShowComments] = useState(false);
+
+  const commentForm = useForm<z.infer<typeof CommentForm>>({
+    mode: "onChange",
+    resolver: zodResolver(CommentForm),
+    defaultValues: {
+      body: "",
+    },
+  });
+
+  const isSubmitting = commentForm.formState.isSubmitting;
+
+  const onCommentSubmit: SubmitHandler<z.infer<typeof CommentForm>> = async (
+    formData
+  ) => {
+    console.log(formData);
+
+    try {
+      if (state.user && story_id) {
+        if (replyToCommentId) {
+          const data = {
+            body: formData.body,
+            authorId: state.user.id,
+            contentId: story_id,
+            parentId: replyToCommentId,
+          };
+
+          const res = await addReplyToComment(data);
+          toast({
+            title: "Reply added successfully",
+          });
+        } else {
+          const data = {
+            body: formData.body,
+            authorId: state.user.id,
+            contentId: story_id,
+          };
+
+          const res = await addCommentToContent(data);
+          toast({
+            title: "Comment added successfully",
+          });
+        }
+
+        commentForm.reset();
+        router.refresh();
+      } else {
+        toast({
+          title: "Please login to comment",
+        });
+        commentForm.reset();
+      }
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Unknown error occured",
+      });
+    }
+  };
 
   const FollowUser = async ({
     followerId,
@@ -318,6 +392,108 @@ const Page = () => {
     }
   }, [story_id, content]);
 
+  const renderComments = (comments: commentWithChildren[] | undefined) => {
+    if (!comments) return null;
+
+    return (
+      <div className="comments-container space-y-4">
+        {comments.map((comment, index) => (
+          <div className="comment-wrapper" key={index}>
+            {/* Main Comment */}
+            {!comment.parentId && ( // Render only if it's a top-level comment
+              <div className="flex space-x-2 items-center w-[85%] mt-4">
+                <Link
+                  href={`/explore/profile?id=${comment.authorId}`}
+                  className={`flex rounded-full cursor-pointer `}
+                >
+                  <Image
+                    src={
+                      comment.author?.profile_picture ||
+                      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4CUkdaTo6Na0w9vdr4Km_0Sx0hTZ5eecjPCQ89fj87A&s"
+                    }
+                    alt="author_image"
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover bg-black p-2 m-auto"
+                  />
+                </Link>
+                <div className="flex flex-col w-[90%]">
+                  <Link
+                    href={`/explore/profile?id=${comment.authorId}`}
+                    className={`flex cursor-pointer font-bold `}
+                  >
+                    {comment.author.full_name}
+                  </Link>
+                  <div className="flex">{comment.body}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Reply Button */}
+            {!replyToCommentId &&
+              !comment.parentId && ( // Only show reply button for top-level comments
+                <button
+                  onClick={() => {
+                    commentForm.reset({
+                      body: `@${comment.author.full_name?.replaceAll(
+                        " ",
+                        "_"
+                      )} `,
+                    });
+                    setReplyToCommentId(comment.id); // Set the reply target ID
+                    commentForm.setFocus("body");
+                  }}
+                  className="text-blue-500 cursor-pointer ml-10"
+                >
+                  Reply
+                </button>
+              )}
+
+            {/* Replies */}
+            {comment.children && ( // Render replies if they exist
+              <div className="replies-container ml-10 mt-2 space-y-2">
+                {renderReplies(comment.children)}{" "}
+                {/* Updated to renderReplies */}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Separate function to render replies
+  const renderReplies = (replies: commentWithChildren[]) => {
+    return replies.map((reply, index) => (
+      <div className="flex space-x-2 items-center mt-2" key={index}>
+        <Link
+          href={`/explore/profile?id=${reply.authorId}`}
+          className={`flex rounded-full cursor-pointer`}
+        >
+          <Image
+            src={
+              reply.author?.profile_picture ||
+              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4CUkdaTo6Na0w9vdr4Km_0Sx0hTZ5eecjPCQ89fj87A&s"
+            }
+            alt="author_image"
+            width={40}
+            height={40}
+            className="rounded-full object-cover bg-black p-2 m-auto"
+          />
+        </Link>
+        <div className="flex flex-col w-[90%]">
+          <Link
+            href={`/explore/profile?id=${reply.authorId}`}
+            className={`flex cursor-pointer font-bold `}
+          >
+            {reply.author.full_name}
+          </Link>
+          <div className="flex">{reply.body}</div>
+        </div>
+      </div>
+    ));
+  };
+
   if (!content) {
     return (
       <div className="flex text-white flex-1 justify-center items-center h-[300px]">
@@ -411,7 +587,7 @@ const Page = () => {
                         {liked ? <>👏</> : <>👍</>} {likes}
                       </div>
                       <div className={`flex  items-center justify-center `}>
-                        🗨️ {content.comments}
+                        🗨️ {content.commentsCount}
                       </div>
                     </>
                   )}
@@ -515,7 +691,7 @@ const Page = () => {
                     👏 {content.likes}
                   </div>
                   <div className={`flex  items-center justify-center `}>
-                    🗨️ {content.comments}
+                    🗨️ {content.commentsCount}
                   </div>
                 </div>
               </div>
@@ -551,6 +727,63 @@ const Page = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </Button>
+            </div>
+          </div>
+
+          <div className="flex  flex-col w-full  space-x-2 md:p-2 py-2">
+            {showComments && (
+              <div className="overflow-y-auto">
+                {renderComments(content.comments)}
+              </div>
+            )}
+
+            {showComments && (
+              <div
+                className="flex px-2 cursor-pointer text-gray-500 "
+                onClick={() => setShowComments((prev) => !prev)}
+              >
+                Hide comments
+              </div>
+            )}
+
+            {content.commentsCount > 0 && !showComments && (
+              <div
+                className="flex px-2 cursor-pointer text-gray-500 "
+                onClick={() => setShowComments((prev) => !prev)}
+              >
+                View All {content.commentsCount} comments
+              </div>
+            )}
+
+            <div className="flex">
+              <Form {...commentForm}>
+                <form
+                  onSubmit={commentForm.handleSubmit(onCommentSubmit)}
+                  className="w-full text-black  mb-8 space-y-4 flex  items-center justify-center  "
+                >
+                  <div className="flex justify-center flex-1 py-2">
+                    <div className="flex flex-col w-full">
+                      <FormField
+                        disabled={isSubmitting}
+                        control={commentForm.control}
+                        name="body"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                className="text-white border-0 border-b-2  rounded-[10px] focus:ring-0 focus:border-transparent"
+                                placeholder="Add a Comment"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </form>
+              </Form>
             </div>
           </div>
 
@@ -698,7 +931,7 @@ const Page = () => {
                               <div
                                 className={`flex  items-center justify-center `}
                               >
-                                🗨️ {content.comments}
+                                🗨️ {content.commentsCount}
                               </div>
                             </div>
                           )}

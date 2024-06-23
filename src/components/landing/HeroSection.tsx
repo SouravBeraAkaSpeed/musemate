@@ -9,6 +9,7 @@ import { contentWithUser } from "@/lib/types";
 import { getPopularContents } from "@/lib/supabase/queries";
 import ContentCard from "../content-card";
 import { Loader2 } from "lucide-react";
+import { Content_Type } from "@prisma/client";
 
 export function Hero() {
   const router = useRouter();
@@ -36,9 +37,11 @@ export function Hero() {
         titleComponent={
           <>
             <h1 className="text-4xl font-semibold text-black dark:text-white">
-              The world&apos;s most positive platform for<br />
+              The world&apos;s most positive platform for
+              <br />
               <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
-                <span className="text-red-500">Artist</span> to engage <span className="text-red-500">Peoples</span>
+                <span className="text-red-500">Artist</span> to engage{" "}
+                <span className="text-red-500">Peoples</span>
               </span>
             </h1>
           </>
@@ -65,28 +68,32 @@ export function Hero() {
             </div>
           )}
           {popularContents.slice(0, 3).map((content, index) => (
-            <Link
-              href={`/explore/story?id=${content.id}`}
-              className="flex md:w-1/3 cursor-pointer  w-full items-center justify-center flex-col mx-4 "
-              key={index}
-            >
-              <div className="flex text-lg w-full text-justify justify-center items-center font-bold">
-                {content.caption}
-              </div>
-              <div className="flex text-md w-full justify-center items-center my-4 ">
-                {content.description &&
-                  content.description?.substring(0, 40) + "..."}
-              </div>
-              <div className="flex w-full items-center justify-center ">
-                <Image
-                  src={content.pictures[0]}
-                  alt="popular_image"
-                  width={300}
-                  height={300}
-                  className="w-[300px] h-[300px] object-cover rounded-[10px]"
-                />
-              </div>
-            </Link>
+            <>
+              {content.type !== Content_Type.POLL && (
+                <Link
+                  href={`/explore/story?id=${content.id}`}
+                  className="flex md:w-1/3 cursor-pointer  w-full items-center justify-center flex-col mx-4 "
+                  key={index}
+                >
+                  <div className="flex text-lg w-full text-justify justify-center items-center font-bold">
+                    {content.caption}
+                  </div>
+                  <div className="flex text-md w-full justify-center items-center my-4 ">
+                    {content.description &&
+                      content.description?.substring(0, 40) + "..."}
+                  </div>
+                  <div className="flex w-full items-center justify-center ">
+                    <Image
+                      src={content.pictures[0]}
+                      alt="popular_image"
+                      width={300}
+                      height={300}
+                      className="w-[300px] h-[300px] object-cover rounded-[10px]"
+                    />
+                  </div>
+                </Link>
+              )}
+            </>
           ))}
         </div>
       </div>

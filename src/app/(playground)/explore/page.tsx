@@ -162,7 +162,7 @@ const Page = () => {
   return (
     <div className="flex flex-col w-full">
       <div className="flex   mt-10 w-full  min-h-screen">
-        <div className="flex flex-1 w-3/4  flex-col md:border-r-2  h-full">
+        <div className="flex flex-1 md:w-3/4 w-[80%]  flex-col md:border-r-2  h-full">
           <div className="flex items-center w-full px-3">
             <Button
               onClick={() => router.push("/explore")}
@@ -235,8 +235,8 @@ const Page = () => {
             <div className="md:hidden flex ">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="  bg-transparent text-white rounded-[10px] hover:bg-gray-500  m-2 p-2 border-2 ">
-                    <div>Categories</div>
+                  <Button className="  bg-transparent text-white rounded-[10px] hover:bg-gray-500  m-2 p-2 border-0">
+                    <div>...</div>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[170px] rounded-[10px]">

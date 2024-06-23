@@ -155,13 +155,15 @@ const Page = () => {
       getfilterContentsByFollowing();
       getfilterContentsByNotFollowing();
     }
+
+    console.log("latestcontent:",latestContents)
   }, [state.user, feed]);
 
   return (
     <div className="flex flex-col w-full">
-      <div className="flex md:mx-[100px] mx-3 mt-10  min-h-screen">
-        <div className="flex flex-1 w-3/4  flex-col md:border-r-2 h-full">
-          <div className="flex items-center">
+      <div className="flex   mt-10 w-full  min-h-screen">
+        <div className="flex flex-1 w-3/4  flex-col md:border-r-2  h-full">
+          <div className="flex items-center w-full px-3">
             <Button
               onClick={() => router.push("/explore")}
               className={`${
@@ -311,7 +313,7 @@ const Page = () => {
               <p className="text-xs text-white ">Loading ...</p>
             </div>
           ) : (
-            <div className="flex flex-col my-10 min-h-screen">
+            <div className="flex flex-col mx-10 min-h-screen">
               {!feed
                 ? latestContents.map((content, index) => (
                     <ContentCard

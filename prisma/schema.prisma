@@ -436,6 +436,7 @@ model Poll_options {
   id         String  @id @db.Uuid
   option     String
   percentage Int     @default(0)
+  votes      Int     @default(0)
   contentId  String
   content    Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
 

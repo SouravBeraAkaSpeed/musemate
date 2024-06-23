@@ -1,9 +1,10 @@
 "use server";
-import { Interests } from "@prisma/client";
+import { Interests, Visibility_type } from "@prisma/client";
 import { db } from "../db";
 import { content, contentWithUser, user } from "../types";
 import { v4 } from "uuid";
 import { toast } from "@/components/ui/use-toast";
+import { PollOption } from "@/app/(playground)/create/poll/page";
 
 export const onBoardUser = async (user: user) => {
   const email = user.email;
@@ -25,7 +26,7 @@ export const onBoardUser = async (user: user) => {
 export const getLatestTenPost = async (authorId?: string, index?: number) => {
   try {
     const contents = await db.content.findMany({
-      where: authorId ? { NOT: { authorId } } : {},
+      
       orderBy: {
         createdAt: "desc",
       },
@@ -579,4 +580,72 @@ export const getContentLikes = async (contentId: string) => {
     console.error(error);
     return null;
   }
+};
+
+export const createPoll = async (
+  caption: string,
+  options: string[],
+  authorId: string
+) => {
+  if (!caption || !options || options.length === 0) {
+    return null;
+  }
+
+  try {
+    const poll = await db.content.create({
+      data: {
+        type: "POLL",
+        caption,
+        id: v4(),
+        visibility_type: Visibility_type.Public,
+        Poll_options: {
+          create: options.map((option: string) => ({
+            option: option,
+            id: v4(),
+          })),
+        },
+        author: {
+          connect: {
+            id: authorId,
+          },
+        },
+      },
+    });
+
+    return poll;
+  } catch (error) {
+    console.error("Error creating poll:", error);
+    return null;
+  }
+};
+
+export const UpdatePollVote = async (pollId: string, optionId: string) => {
+  if (!pollId || !optionId) {
+    return null;
+  }
+
+  try {
+    const option = await db.poll_options.update({
+      where: { id: optionId },
+      data: { votes: { increment: 1 } },
+    });
+
+    const pollOptions = await db.poll_options.findMany({
+      where: { contentId: pollId },
+    });
+
+    return pollOptions;
+  } catch (error) {
+    console.error("Error voting:", error);
+    return null;
+  }
+};
+
+export const getPollDetail = async (contentId: string) => {
+  const poll = await db.content.findUnique({
+    where: { id: contentId },
+    include: { Poll_options: true },
+  });
+
+  return poll;
 };

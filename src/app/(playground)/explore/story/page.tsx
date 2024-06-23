@@ -399,8 +399,8 @@ const Page = () => {
       <div className="comments-container space-y-4">
         {comments.map((comment, index) => (
           <div className="comment-wrapper" key={index}>
-            {/* Main Comment */}
-            {!comment.parentId && ( // Render only if it's a top-level comment
+          
+            {!comment.parentId && ( 
               <div className="flex space-x-2 items-center w-[85%] mt-4">
                 <Link
                   href={`/explore/profile?id=${comment.authorId}`}

@@ -18,6 +18,7 @@ import {
   addReplyToComment,
   checkIfLiked,
   followUser,
+  getPollDetail,
   toggleLikeContent,
 } from "@/lib/supabase/queries";
 import { toast } from "./ui/use-toast";
@@ -32,6 +33,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import Poll from "./poll";
 
 const ContentCard = ({
   content,
@@ -43,6 +45,17 @@ const ContentCard = ({
   type: string;
 }) => {
   console.log(content);
+  const [polls, setPolls] = useState<{
+    pollId: string;
+    caption: string | null;
+    options: {
+      id: string;
+      option: string;
+      votes: number;
+      percentage: number;
+      contentId: string;
+    }[];
+  } | null>(null);
   const { state } = useSupabaseUser();
   const [replyToCommentId, setReplyToCommentId] = useState<string>("");
   const [showComments, setShowComments] = useState(false);
@@ -164,8 +177,8 @@ const ContentCard = ({
       <div className="comments-container space-y-4">
         {comments.map((comment, index) => (
           <div className="comment-wrapper" key={index}>
-            {/* Main Comment */}
-            {!comment.parentId && ( // Render only if it's a top-level comment
+         
+            {!comment.parentId && ( 
               <div className="flex space-x-2 items-center w-[85%] mt-4">
                 <Link
                   href={`/explore/profile?id=${comment.authorId}`}
@@ -315,6 +328,28 @@ const ContentCard = ({
     }
   };
 
+  useEffect(() => {
+    const getPoll = async () => {
+      const poll = await getPollDetail(content.id);
+
+      if (poll) {
+        setPolls({
+          pollId: poll.id,
+          caption: poll.caption,
+          options: poll.Poll_options,
+        });
+      }
+    };
+
+    if (content.type === Content_Type.POLL && !isPopular) {
+      getPoll();
+    }
+  }, [content]);
+
+  if (content.type === Content_Type.POLL && isPopular) {
+    return null;
+  }
+
   return (
     <div
       className={`flex flex-col  rounded-[10px]  ${
@@ -376,17 +411,22 @@ const ContentCard = ({
           >
             <div
               className="flex flex-col cursor-pointer w-[90%] "
-              onClick={() => router.push(`/explore/story?id=${content.id}`)}
+              onClick={() =>
+                content.type !== Content_Type.POLL &&
+                router.push(`/explore/story?id=${content.id}`)
+              }
             >
-              <div
-                className={`flex w-full text-justify  py-2 ${
-                  isPopular ? "text-md px-2" : "text-lg"
-                } font-bold`}
-              >
-                {content.caption}
-              </div>
+              {content.type !== Content_Type.POLL && (
+                <div
+                  className={`flex w-full text-justify  py-2 ${
+                    isPopular ? "text-md px-2" : "text-lg"
+                  } font-bold`}
+                >
+                  {content.caption}
+                </div>
+              )}
 
-              {!isPopular && (
+              {!isPopular && content.type !== Content_Type.POLL && (
                 <div className="flex w-full flex-col py-2">
                   <div className="w-full font-bold ">
                     Title - {content.title}
@@ -394,6 +434,16 @@ const ContentCard = ({
                   <div className="w-full text-gray-500 text-justify">
                     {content.description}
                   </div>
+                </div>
+              )}
+
+              {content.type === Content_Type.POLL && polls && (
+                <div className="container mx-auto p-4">
+                  <Poll
+                    pollId={polls.pollId}
+                    caption={polls.caption}
+                    options={polls.options}
+                  />
                 </div>
               )}
             </div>
